@@ -30,15 +30,15 @@ export function HeroSection() {
         </p>
         <div className="flex flex-wrap gap-4">
           <Link href="/shop">
-            <Button size="lg" className="bg-white text-black border-white hover:bg-black hover:text-white hover:border-white">
+            <Button size="lg" className="bg-white text-black border border-white hover:bg-transparent hover:text-white">
               Shop Boards
             </Button>
           </Link>
           <Link href="/blog">
             <Button
-              variant="outline"
+              variant="ghost"
               size="lg"
-              className="border-white text-white hover:bg-white hover:text-black"
+              className="bg-transparent text-white border border-white hover:bg-white hover:text-black"
             >
               About Infamous
             </Button>
