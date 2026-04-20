@@ -34,13 +34,15 @@ export async function POST(req: NextRequest) {
 
     const supabase = createServiceClient();
 
+    const paymentIntentId = typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? null);
+
     const { error } = await supabase
       .from("orders")
       .update({
         status: "confirmed",
-        payment_intent_id: typeof session.payment_intent === "string"
-          ? session.payment_intent
-          : (session.payment_intent?.id ?? null),
+        ...(paymentIntentId ? { payment_intent_id: paymentIntentId } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq("id", orderId);
