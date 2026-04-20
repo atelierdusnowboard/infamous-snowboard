@@ -4,7 +4,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { useUIStore } from "@/lib/store/ui";
 
 export function CartIcon() {
-  const count = useCartStore((s) => s.count);
+  const count = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0));
   const { toggleCart } = useUIStore();
 
   return (

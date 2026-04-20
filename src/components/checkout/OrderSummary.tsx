@@ -6,7 +6,7 @@ import { formatPrice } from "@/lib/utils/format";
 
 export function OrderSummary() {
   const items = useCartStore((s) => s.items);
-  const total = useCartStore((s) => s.total);
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = total >= 300 ? 0 : 12;
 
   return (
