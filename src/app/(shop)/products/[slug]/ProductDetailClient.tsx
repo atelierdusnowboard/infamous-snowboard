@@ -65,6 +65,8 @@ export default function ProductDetailClient({
         />
       )}
 
+      <div className="py-4 border-t border-black/10" />
+
       {/* CTA row */}
       <div className="flex gap-3">
         <div className="flex-1">
