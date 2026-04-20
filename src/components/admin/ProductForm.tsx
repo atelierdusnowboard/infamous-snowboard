@@ -3,7 +3,15 @@
 import { useState, useTransition } from "react";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { createProduct, updateProduct, uploadProductImage } from "@/lib/actions/products";
+import Image from "next/image";
+import {
+  createProduct,
+  updateProduct,
+  uploadProductImage,
+  setProductImagePrimary,
+  deleteProductImage,
+} from "@/lib/actions/products";
+import type { ProductImage } from "@/types/database";
 import { useToast } from "@/components/ui/Toast";
 import { slugify } from "@/lib/utils/format";
 import type { ProductWithImages } from "@/types/product";
@@ -36,6 +44,15 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     }));
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [images, setImages] = useState<ProductImage[]>(
+    product?.product_images
+      ? [...product.product_images].sort((a, b) => {
+          if (a.is_primary) return -1;
+          if (b.is_primary) return 1;
+          return a.sort_order - b.sort_order;
+        })
+      : []
+  );
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     setName(e.target.value);
@@ -87,16 +104,51 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     if (!product?.id) return;
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
     setUploadingImage(true);
-    const result = await uploadProductImage(product.id, file, false);
+    for (const file of files) {
+      const isPrimary = images.length === 0;
+      const result = await uploadProductImage(product.id, file, isPrimary);
+      if (result?.error) {
+        toast(result.error, "error");
+      } else if (result?.image) {
+        setImages((prev) => [...prev, result.image as ProductImage]);
+      }
+    }
     setUploadingImage(false);
+    e.target.value = "";
+    toast(`${files.length} image${files.length > 1 ? "s" : ""} uploadée${files.length > 1 ? "s" : ""}`, "success");
+  }
+
+  async function handleSetPrimary(imageId: string) {
+    if (!product?.id) return;
+    const result = await setProductImagePrimary(imageId, product.id);
     if (result?.error) {
       toast(result.error, "error");
     } else {
-      toast("Image uploaded", "success");
+      setImages((prev) =>
+        prev.map((img) => ({ ...img, is_primary: img.id === imageId }))
+      );
+      toast("Image de couverture définie", "success");
     }
+  }
+
+  async function handleDeleteImage(imageId: string, storagePath: string) {
+    if (!product?.id) return;
+    if (!confirm("Supprimer cette image ?")) return;
+    const result = await deleteProductImage(imageId, storagePath, product.id);
+    if (result?.error) {
+      toast(result.error, "error");
+    } else {
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      toast("Image supprimée", "success");
+    }
+  }
+
+  function getImageSrc(img: ProductImage) {
+    if (img.storage_path.startsWith("http")) return img.storage_path;
+    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${img.storage_path}`;
   }
 
   return (
@@ -217,23 +269,73 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         </label>
       </div>
 
-      {/* Image upload (only for existing products) */}
+      {/* Image management (only for existing products) */}
       {product && (
-        <div>
-          <label className="text-xs font-bold uppercase tracking-widest block mb-2">
-            Upload Image
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            disabled={uploadingImage}
-            className="text-xs"
-          />
-          {uploadingImage && (
-            <p className="text-xs text-black/40 mt-2 uppercase tracking-widest">
-              Uploading...
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-widest">
+              Images ({images.length})
+            </label>
+            <label className={`cursor-pointer border border-black px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors ${uploadingImage ? "opacity-50 cursor-not-allowed" : "hover:bg-black hover:text-white"}`}>
+              {uploadingImage ? "Upload en cours..." : "+ Ajouter des images"}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                disabled={uploadingImage}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {images.length === 0 ? (
+            <p className="text-xs text-black/40 uppercase tracking-widest py-4 text-center border border-black/20 border-dashed">
+              Aucune image — uploadez-en une ci-dessus
             </p>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {images.map((img) => (
+                <div key={img.id} className="relative group">
+                  {/* Image */}
+                  <div className={`relative border-2 overflow-hidden bg-white ${img.is_primary ? "border-black" : "border-black/20"}`} style={{ aspectRatio: "808/1280" }}>
+                    <Image
+                      src={getImageSrc(img)}
+                      alt="product image"
+                      fill
+                      sizes="150px"
+                      className="object-contain"
+                    />
+                    {/* Primary badge */}
+                    {img.is_primary && (
+                      <div className="absolute top-1 left-1 bg-black text-white text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5">
+                        Couverture
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions (visible on hover) */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    {!img.is_primary && (
+                      <button
+                        type="button"
+                        onClick={() => handleSetPrimary(img.id)}
+                        className="bg-white text-black text-[9px] font-bold uppercase tracking-widest px-2 py-1 hover:bg-black hover:text-white transition-colors w-20 text-center"
+                      >
+                        ★ Couverture
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteImage(img.id, img.storage_path)}
+                      className="bg-white text-black text-[9px] font-bold uppercase tracking-widest px-2 py-1 hover:bg-black hover:text-white transition-colors w-20 text-center"
+                    >
+                      ✕ Supprimer
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

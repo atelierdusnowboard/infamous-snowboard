@@ -81,22 +81,69 @@ export async function uploadProductImage(
 ) {
   const supabase = await createClient();
   const ext = file.name.split(".").pop();
-  const path = `${productId}/${Date.now()}.${ext}`;
+  const storagePath = `${productId}/${Date.now()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from("product-images")
-    .upload(path, file, { upsert: true });
+    .upload(storagePath, file, { upsert: true });
 
   if (uploadError) return { error: uploadError.message };
 
-  const { error: dbError } = await supabase.from("product_images").insert({
-    product_id: productId,
-    storage_path: path,
-    is_primary: isPrimary,
-    sort_order: 0,
-  });
+  // Count existing images to set sort_order
+  const { count } = await supabase
+    .from("product_images")
+    .select("*", { count: "exact", head: true })
+    .eq("product_id", productId);
+
+  const { data, error: dbError } = await supabase
+    .from("product_images")
+    .insert({
+      product_id: productId,
+      storage_path: storagePath,
+      is_primary: isPrimary,
+      sort_order: count ?? 0,
+    })
+    .select()
+    .single();
 
   if (dbError) return { error: dbError.message };
   revalidatePath(`/admin/products/${productId}`);
-  return { success: true, path };
+  revalidatePath(`/products`);
+  return { success: true, image: data };
+}
+
+export async function setProductImagePrimary(imageId: string, productId: string) {
+  const supabase = await createClient();
+
+  // Unset all primaries for this product
+  await supabase
+    .from("product_images")
+    .update({ is_primary: false })
+    .eq("product_id", productId);
+
+  // Set the selected one
+  const { error } = await supabase
+    .from("product_images")
+    .update({ is_primary: true })
+    .eq("id", imageId);
+
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath(`/products`);
+  return { success: true };
+}
+
+export async function deleteProductImage(imageId: string, storagePath: string, productId: string) {
+  const supabase = await createClient();
+
+  await supabase.storage.from("product-images").remove([storagePath]);
+
+  const { error } = await supabase
+    .from("product_images")
+    .delete()
+    .eq("id", imageId);
+
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/products/${productId}`);
+  return { success: true };
 }
