@@ -53,18 +53,24 @@ export interface Database {
           id: string;
           name: string;
           slug: string;
+          show_in_nav: boolean;
+          sort_order: number;
           created_at: string;
         };
         Insert: {
           id?: string;
           name: string;
           slug: string;
+          show_in_nav?: boolean;
+          sort_order?: number;
           created_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
           slug?: string;
+          show_in_nav?: boolean;
+          sort_order?: number;
         };
       };
       products: {
