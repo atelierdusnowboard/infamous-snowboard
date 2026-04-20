@@ -32,7 +32,6 @@ export default async function AccountPage() {
     { href: "/account/profile", label: "Edit Profile" },
     { href: "/account/orders", label: "Order History" },
     { href: "/account/wishlist", label: "Wishlist" },
-    { href: "/account/subscription", label: "Subscription" },
   ];
 
   return (

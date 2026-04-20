@@ -62,12 +62,6 @@ export function Header() {
           >
             Blog
           </Link>
-          <Link
-            href="/pro"
-            className="text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
-          >
-            Pro
-          </Link>
         </nav>
 
         {/* Actions */}

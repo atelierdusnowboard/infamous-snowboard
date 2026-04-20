@@ -14,9 +14,6 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
-export type SubscriptionPlan = "monthly" | "yearly" | "lifetime";
-export type SubscriptionStatus = "active" | "cancelled" | "expired" | "trial";
-
 export interface Database {
   public: {
     Tables: {
@@ -197,6 +194,7 @@ export interface Database {
           shipping_cost: number;
           total: number;
           notes: string | null;
+          payment_intent_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -214,6 +212,7 @@ export interface Database {
           shipping_cost?: number;
           total: number;
           notes?: string | null;
+          payment_intent_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -231,6 +230,7 @@ export interface Database {
           shipping_cost?: number;
           total?: number;
           notes?: string | null;
+          payment_intent_id?: string | null;
           updated_at?: string;
         };
       };
@@ -320,37 +320,6 @@ export interface Database {
           updated_at?: string;
         };
       };
-      subscriptions: {
-        Row: {
-          id: string;
-          user_id: string;
-          revenuecat_customer_id: string | null;
-          plan: SubscriptionPlan;
-          status: SubscriptionStatus;
-          current_period_end: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          revenuecat_customer_id?: string | null;
-          plan: SubscriptionPlan;
-          status?: SubscriptionStatus;
-          current_period_end?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          revenuecat_customer_id?: string | null;
-          plan?: SubscriptionPlan;
-          status?: SubscriptionStatus;
-          current_period_end?: string | null;
-          updated_at?: string;
-        };
-      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -361,8 +330,6 @@ export interface Database {
     };
     Enums: {
       order_status: OrderStatus;
-      subscription_plan: SubscriptionPlan;
-      subscription_status: SubscriptionStatus;
     };
   };
 }

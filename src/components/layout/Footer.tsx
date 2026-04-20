@@ -78,14 +78,6 @@ export function Footer() {
                   Account
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/pro"
-                  className="text-sm hover:opacity-60 transition-opacity"
-                >
-                  Pro
-                </Link>
-              </li>
             </ul>
           </div>
         </div>

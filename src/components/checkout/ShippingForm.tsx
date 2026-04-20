@@ -3,13 +3,12 @@
 import { useState, useTransition } from "react";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { createOrder } from "@/lib/actions/orders";
+import { createCheckoutSession } from "@/lib/actions/checkout";
 import { useCartStore } from "@/lib/store/cart";
 import { useToast } from "@/components/ui/Toast";
 
 export function ShippingForm() {
   const items = useCartStore((s) => s.items);
-  const clearCart = useCartStore((s) => s.clearCart);
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -23,12 +22,13 @@ export function ShippingForm() {
     });
 
     startTransition(async () => {
-      const result = await createOrder(items, data);
-      if (result?.error) {
+      const result = await createCheckoutSession(items, data);
+      if ("error" in result) {
         toast(result.error, "error");
         setErrors({ general: result.error });
       } else {
-        clearCart();
+        // Redirect to Stripe Checkout hosted page
+        window.location.href = result.url;
       }
     });
   }
@@ -96,16 +96,6 @@ export function ShippingForm() {
         </div>
       </div>
 
-      {/* Payment placeholder */}
-      <div className="border border-black p-4 bg-black/5">
-        <p className="text-xs font-bold uppercase tracking-widest text-black/40">
-          Payment — Coming Soon
-        </p>
-        <p className="text-xs text-black/40 mt-1">
-          Your order will be placed as pending. We&apos;ll contact you for payment.
-        </p>
-      </div>
-
       {errors.general && (
         <p className="text-xs font-bold uppercase text-black">{errors.general}</p>
       )}
@@ -117,7 +107,7 @@ export function ShippingForm() {
         className="w-full"
         disabled={items.length === 0}
       >
-        {items.length === 0 ? "Cart is empty" : "Place Order"}
+        {items.length === 0 ? "Cart is empty" : "Payer"}
       </Button>
     </form>
   );

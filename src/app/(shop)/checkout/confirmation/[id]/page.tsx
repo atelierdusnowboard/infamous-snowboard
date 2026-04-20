@@ -12,12 +12,15 @@ export const metadata: Metadata = {
 
 interface ConfirmationPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ session_id?: string }>;
 }
 
 export default async function ConfirmationPage({
   params,
+  searchParams,
 }: ConfirmationPageProps) {
   const { id } = await params;
+  const { session_id } = await searchParams;
 
   let order = null;
   try {
@@ -28,19 +31,40 @@ export default async function ConfirmationPage({
 
   if (!order) notFound();
 
+  const isPaid =
+    order.status === "confirmed" ||
+    order.status === "processing" ||
+    order.status === "shipped" ||
+    order.status === "delivered";
+
   return (
     <div className="max-w-screen-xl mx-auto px-4 py-12">
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="border-b border-black pb-8 mb-8">
           <p className="text-xs font-bold uppercase tracking-widest text-black/40 mb-4">
-            Order confirmed
+            {isPaid ? "Commande confirmée" : "Order received"}
           </p>
           <h1 className="text-3xl md:text-4xl font-black uppercase tracking-widest leading-tight">
-            Your Order Is In.
-            <br />
-            Gear Up.
+            {isPaid ? (
+              <>
+                COMMANDE
+                <br />
+                CONFIRMÉE.
+              </>
+            ) : (
+              <>
+                Your Order Is In.
+                <br />
+                Gear Up.
+              </>
+            )}
           </h1>
+          {session_id && isPaid && (
+            <p className="text-xs text-black/40 mt-4 uppercase tracking-widest">
+              Paiement validé par Stripe.
+            </p>
+          )}
         </div>
 
         {/* Order info */}
@@ -107,10 +131,16 @@ export default async function ConfirmationPage({
             <p className="text-sm text-black/60">{order.shipping_country}</p>
           </div>
 
-          {/* Payment note */}
-          <div className="border border-black px-4 py-4 bg-black/5">
-            <p className="text-xs font-bold uppercase tracking-widest text-black/60">
-              Payment pending. We&apos;ll be in touch shortly.
+          {/* Payment status */}
+          <div
+            className={`border px-4 py-4 ${
+              isPaid ? "border-black bg-black text-white" : "border-black bg-black/5"
+            }`}
+          >
+            <p className="text-xs font-bold uppercase tracking-widest">
+              {isPaid
+                ? "Paiement confirmé. Votre commande est en cours de traitement."
+                : "Paiement en attente."}
             </p>
           </div>
 

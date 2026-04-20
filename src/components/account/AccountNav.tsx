@@ -10,7 +10,6 @@ const navItems = [
   { href: "/account/profile", label: "Edit Profile" },
   { href: "/account/orders", label: "Orders" },
   { href: "/account/wishlist", label: "Wishlist" },
-  { href: "/account/subscription", label: "Subscription" },
 ];
 
 export function AccountNav() {

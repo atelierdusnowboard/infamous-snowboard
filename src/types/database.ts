@@ -11,5 +11,3 @@ export type Wishlist = Database["public"]["Tables"]["wishlists"]["Row"];
 export type Order = Database["public"]["Tables"]["orders"]["Row"];
 export type OrderItem = Database["public"]["Tables"]["order_items"]["Row"];
 export type BlogPost = Database["public"]["Tables"]["blog_posts"]["Row"];
-export type Subscription =
-  Database["public"]["Tables"]["subscriptions"]["Row"];
