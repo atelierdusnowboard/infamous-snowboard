@@ -45,7 +45,7 @@ export function CartItem({ item }: CartItemProps) {
         <div className="flex items-center gap-2 mt-2">
           <button
             onClick={() => updateQty(item.variantId, item.quantity - 1)}
-            className="w-6 h-6 border border-black flex items-center justify-center text-xs font-bold hover:bg-black hover:text-white transition-colors"
+            className="w-6 h-6 border border-black flex items-center justify-center text-xs font-bold hover:bg-black hover:!text-white transition-colors"
             aria-label="Decrease quantity"
           >
             -
@@ -55,7 +55,7 @@ export function CartItem({ item }: CartItemProps) {
           </span>
           <button
             onClick={() => updateQty(item.variantId, item.quantity + 1)}
-            className="w-6 h-6 border border-black flex items-center justify-center text-xs font-bold hover:bg-black hover:text-white transition-colors"
+            className="w-6 h-6 border border-black flex items-center justify-center text-xs font-bold hover:bg-black hover:!text-white transition-colors"
             aria-label="Increase quantity"
           >
             +

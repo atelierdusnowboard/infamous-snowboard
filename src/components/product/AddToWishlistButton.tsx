@@ -52,7 +52,7 @@ export function AddToWishlistButton({
         "disabled:opacity-50",
         wishlisted
           ? "bg-black text-white hover:bg-white hover:text-black"
-          : "bg-white text-black hover:bg-black hover:text-white"
+          : "bg-white text-black hover:bg-black hover:!text-white"
       )}
     >
       <svg

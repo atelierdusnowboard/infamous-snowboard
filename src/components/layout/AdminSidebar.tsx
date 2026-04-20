@@ -41,7 +41,7 @@ export function AdminSidebar() {
                 "transition-colors duration-150",
                 active
                   ? "bg-black text-white"
-                  : "text-black hover:bg-black hover:text-white"
+                  : "text-black hover:bg-black hover:!text-white"
               )}
             >
               {label}

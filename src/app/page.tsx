@@ -43,7 +43,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/blog"
-                className="text-xs font-bold uppercase tracking-widest border border-black px-6 py-3 hover:bg-black hover:text-white transition-colors shrink-0"
+                className="text-xs font-bold uppercase tracking-widest border border-black px-6 py-3 hover:bg-black hover:!text-white transition-colors shrink-0"
               >
                 Read The Blog &rarr;
               </Link>

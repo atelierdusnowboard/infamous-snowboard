@@ -72,7 +72,7 @@ export default async function AdminDashboardPage() {
           <Link
             key={label}
             href={href}
-            className="bg-white p-6 hover:bg-black hover:text-white transition-colors group"
+            className="bg-white p-6 hover:bg-black hover:!text-white transition-colors group"
           >
             <p className="text-3xl font-black">{value}</p>
             <p className="text-xs font-bold uppercase tracking-widest text-black/40 group-hover:text-white/60 mt-1 transition-colors">

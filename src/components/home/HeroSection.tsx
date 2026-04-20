@@ -38,7 +38,7 @@ export function HeroSection() {
             <Button
               variant="ghost"
               size="lg"
-              className="bg-transparent text-white border border-white hover:bg-white hover:text-black"
+              className="bg-transparent text-white border border-white hover:bg-white hover:!text-black"
             >
               About Infamous
             </Button>

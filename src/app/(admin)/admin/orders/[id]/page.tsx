@@ -77,7 +77,7 @@ export default async function AdminOrderDetailPage({
                     className={`w-full px-4 py-2 text-xs font-bold uppercase tracking-widest border transition-colors ${
                       order.status === status
                         ? "bg-black text-white border-black"
-                        : "bg-white text-black border-black hover:bg-black hover:text-white"
+                        : "bg-white text-black border-black hover:bg-black hover:!text-white"
                     }`}
                   >
                     {status}

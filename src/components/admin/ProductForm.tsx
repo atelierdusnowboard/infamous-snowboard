@@ -276,7 +276,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             <label className="text-xs font-bold uppercase tracking-widest">
               Images ({images.length})
             </label>
-            <label className={`cursor-pointer border border-black px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors ${uploadingImage ? "opacity-50 cursor-not-allowed" : "hover:bg-black hover:text-white"}`}>
+            <label className={`cursor-pointer border border-black px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-colors ${uploadingImage ? "opacity-50 cursor-not-allowed" : "hover:bg-black hover:!text-white"}`}>
               {uploadingImage ? "Upload en cours..." : "+ Ajouter des images"}
               <input
                 type="file"
@@ -320,7 +320,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                       <button
                         type="button"
                         onClick={() => handleSetPrimary(img.id)}
-                        className="bg-white text-black text-[9px] font-bold uppercase tracking-widest px-2 py-1 hover:bg-black hover:text-white transition-colors w-20 text-center"
+                        className="bg-white text-black text-[9px] font-bold uppercase tracking-widest px-2 py-1 hover:bg-black hover:!text-white transition-colors w-20 text-center"
                       >
                         ★ Couverture
                       </button>
@@ -328,7 +328,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                     <button
                       type="button"
                       onClick={() => handleDeleteImage(img.id, img.storage_path)}
-                      className="bg-white text-black text-[9px] font-bold uppercase tracking-widest px-2 py-1 hover:bg-black hover:text-white transition-colors w-20 text-center"
+                      className="bg-white text-black text-[9px] font-bold uppercase tracking-widest px-2 py-1 hover:bg-black hover:!text-white transition-colors w-20 text-center"
                     >
                       ✕ Supprimer
                     </button>

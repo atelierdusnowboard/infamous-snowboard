@@ -64,7 +64,7 @@ export function ProductImageGallery({
               aria-label="Image précédente"
               className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center group"
             >
-              <span className="bg-white border border-black w-8 h-8 flex items-center justify-center text-black text-sm font-bold transition-colors group-hover:bg-black group-hover:text-white">
+              <span className="bg-white border border-black w-8 h-8 flex items-center justify-center text-black text-sm font-bold transition-colors group-hover:bg-black group-hover:!text-white">
                 ←
               </span>
             </button>
@@ -73,7 +73,7 @@ export function ProductImageGallery({
               aria-label="Image suivante"
               className="absolute right-0 top-0 bottom-0 w-12 flex items-center justify-center group"
             >
-              <span className="bg-white border border-black w-8 h-8 flex items-center justify-center text-black text-sm font-bold transition-colors group-hover:bg-black group-hover:text-white">
+              <span className="bg-white border border-black w-8 h-8 flex items-center justify-center text-black text-sm font-bold transition-colors group-hover:bg-black group-hover:!text-white">
                 →
               </span>
             </button>

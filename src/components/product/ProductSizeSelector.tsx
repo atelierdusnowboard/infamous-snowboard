@@ -45,7 +45,7 @@ export function ProductSizeSelector({
                   ? "bg-black text-white border-black"
                   : outOfStock
                     ? "bg-white text-black/30 border-black/30 cursor-not-allowed"
-                    : "bg-white text-black border-black hover:bg-black hover:text-white"
+                    : "bg-white text-black border-black hover:bg-black hover:!text-white"
               )}
               aria-pressed={isSelected}
             >

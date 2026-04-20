@@ -51,7 +51,7 @@ export default async function AccountPage() {
           <Link
             key={href}
             href={href}
-            className="bg-white p-6 hover:bg-black hover:text-white transition-colors group"
+            className="bg-white p-6 hover:bg-black hover:!text-white transition-colors group"
           >
             <p className="text-xs font-black uppercase tracking-widest">
               {label}
