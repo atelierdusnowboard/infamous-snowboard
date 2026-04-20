@@ -35,14 +35,24 @@ export function AdminSidebar() {
             <Link
               key={href}
               href={href}
-              className={cn(
-                "flex items-center px-4 py-3 mb-1",
-                "text-xs font-bold uppercase tracking-widest",
-                "transition-colors duration-150",
+              className="flex items-center px-4 py-3 mb-1 text-xs font-bold uppercase tracking-widest transition-colors duration-150"
+              style={
                 active
-                  ? "bg-black text-white"
-                  : "text-black hover:bg-black hover:!text-white"
-              )}
+                  ? { backgroundColor: "#000", color: "#fff" }
+                  : undefined
+              }
+              onMouseEnter={(e) => {
+                if (!active) {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = "#000";
+                  (e.currentTarget as HTMLElement).style.color = "#fff";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  (e.currentTarget as HTMLElement).style.backgroundColor = "";
+                  (e.currentTarget as HTMLElement).style.color = "";
+                }
+              }}
             >
               {label}
             </Link>
