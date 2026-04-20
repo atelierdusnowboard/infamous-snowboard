@@ -103,9 +103,35 @@ export async function createCheckoutSession(
     });
   }
 
+  // Créer un Customer Stripe pour pré-remplir nom + adresse
+  const customer = await stripe.customers.create({
+    name: parsed.data.name,
+    email: parsed.data.email,
+    address: {
+      line1: parsed.data.address,
+      city: parsed.data.city,
+      postal_code: parsed.data.postal_code,
+      country: parsed.data.country.length === 2
+        ? parsed.data.country.toUpperCase()
+        : "FR",
+    },
+    shipping: {
+      name: parsed.data.name,
+      address: {
+        line1: parsed.data.address,
+        city: parsed.data.city,
+        postal_code: parsed.data.postal_code,
+        country: parsed.data.country.length === 2
+          ? parsed.data.country.toUpperCase()
+          : "FR",
+      },
+    },
+  });
+
   // Create Stripe Checkout Session
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
+    customer: customer.id,
     line_items: lineItems,
     success_url: `${siteUrl}/checkout/confirmation/${order.id}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl}/checkout`,
@@ -113,7 +139,6 @@ export async function createCheckoutSession(
     shipping_address_collection: {
       allowed_countries: ["FR", "BE", "CH", "DE", "IT", "ES", "GB", "US", "CA"],
     },
-    customer_email: parsed.data.email,
   });
 
   if (!session.url) {
