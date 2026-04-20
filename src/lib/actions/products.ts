@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { productSchema } from "@/lib/validations/product";
 
 export async function createProduct(formData: FormData) {
@@ -79,7 +79,7 @@ export async function uploadProductImage(
   file: File,
   isPrimary: boolean = false
 ) {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const ext = file.name.split(".").pop();
   const storagePath = `${productId}/${Date.now()}.${ext}`;
 
@@ -113,7 +113,7 @@ export async function uploadProductImage(
 }
 
 export async function setProductImagePrimary(imageId: string, productId: string) {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   // Unset all primaries for this product
   await supabase
@@ -134,7 +134,7 @@ export async function setProductImagePrimary(imageId: string, productId: string)
 }
 
 export async function deleteProductImage(imageId: string, storagePath: string, productId: string) {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   await supabase.storage.from("product-images").remove([storagePath]);
 
