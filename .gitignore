@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scripts data
+assets/data/
+
+# large image assets (already in Supabase Storage)
+public/boards/
+public/lifestyle/

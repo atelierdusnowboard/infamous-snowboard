@@ -1,0 +1,133 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getOrderById } from "@/lib/queries/orders";
+import { formatPrice, formatDate } from "@/lib/utils/format";
+import { Button } from "@/components/ui/Button";
+
+export const metadata: Metadata = {
+  title: "Order Confirmed",
+  robots: { index: false, follow: false },
+};
+
+interface ConfirmationPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function ConfirmationPage({
+  params,
+}: ConfirmationPageProps) {
+  const { id } = await params;
+
+  let order = null;
+  try {
+    order = await getOrderById(id);
+  } catch {
+    notFound();
+  }
+
+  if (!order) notFound();
+
+  return (
+    <div className="max-w-screen-xl mx-auto px-4 py-12">
+      <div className="max-w-lg mx-auto">
+        {/* Header */}
+        <div className="border-b border-black pb-8 mb-8">
+          <p className="text-xs font-bold uppercase tracking-widest text-black/40 mb-4">
+            Order confirmed
+          </p>
+          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-widest leading-tight">
+            Your Order Is In.
+            <br />
+            Gear Up.
+          </h1>
+        </div>
+
+        {/* Order info */}
+        <div className="space-y-6">
+          <div className="border border-black">
+            <div className="px-4 py-3 border-b border-black bg-black text-white">
+              <p className="text-xs font-bold uppercase tracking-widest">
+                Order #{order.id.slice(0, 8).toUpperCase()}
+              </p>
+            </div>
+            <div className="px-4 py-4 space-y-3">
+              <div className="flex justify-between text-xs">
+                <span className="text-black/40 uppercase tracking-widest">Date</span>
+                <span className="font-bold">{formatDate(order.created_at)}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-black/40 uppercase tracking-widest">Status</span>
+                <span className="font-bold uppercase">{order.status}</span>
+              </div>
+              <div className="flex justify-between text-xs border-t border-black pt-3">
+                <span className="font-bold uppercase tracking-widest">Total</span>
+                <span className="font-black">{formatPrice(order.total)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Items */}
+          <div className="border border-black">
+            <div className="px-4 py-3 border-b border-black">
+              <h3 className="text-xs font-bold uppercase tracking-widest">
+                Items Ordered
+              </h3>
+            </div>
+            {order.order_items.map((item) => (
+              <div
+                key={item.id}
+                className="flex justify-between px-4 py-3 border-b border-black last:border-b-0"
+              >
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest">
+                    {item.product_name}
+                  </p>
+                  {item.size_cm && (
+                    <p className="text-xs text-black/40 mt-0.5">
+                      {item.size_cm} cm
+                    </p>
+                  )}
+                </div>
+                <p className="text-xs font-bold">{formatPrice(item.subtotal)}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Shipping */}
+          <div className="border border-black px-4 py-4">
+            <p className="text-xs font-bold uppercase tracking-widest mb-3">
+              Ships To
+            </p>
+            <p className="text-sm">{order.shipping_name}</p>
+            <p className="text-sm text-black/60">{order.shipping_address}</p>
+            <p className="text-sm text-black/60">
+              {order.shipping_city}, {order.shipping_postal_code}
+            </p>
+            <p className="text-sm text-black/60">{order.shipping_country}</p>
+          </div>
+
+          {/* Payment note */}
+          <div className="border border-black px-4 py-4 bg-black/5">
+            <p className="text-xs font-bold uppercase tracking-widest text-black/60">
+              Payment pending. We&apos;ll be in touch shortly.
+            </p>
+          </div>
+
+          <div className="flex gap-4">
+            <Link href="/account/orders" className="flex-1">
+              <Button variant="outline" size="md" className="w-full">
+                View Orders
+              </Button>
+            </Link>
+            <Link href="/shop" className="flex-1">
+              <Button size="md" className="w-full">
+                Keep Shopping
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
