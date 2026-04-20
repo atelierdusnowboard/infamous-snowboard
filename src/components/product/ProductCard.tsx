@@ -45,14 +45,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
         className
       )}
     >
-      {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-white">
+      {/* Image — 808×1280 portrait ratio */}
+      <div className="relative overflow-hidden bg-white" style={{ aspectRatio: '808/1280' }}>
         <Image
           src={imageUrl}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover grayscale transition-transform duration-300 group-hover:scale-105"
+          className="object-contain grayscale transition-transform duration-300 group-hover:scale-105"
         />
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />

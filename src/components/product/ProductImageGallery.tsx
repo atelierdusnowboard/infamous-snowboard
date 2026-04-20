@@ -36,14 +36,14 @@ export function ProductImageGallery({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Main image */}
-      <div className="relative aspect-square border border-black bg-white overflow-hidden">
+      {/* Main image — 808×1280 portrait ratio */}
+      <div className="relative border border-black bg-white overflow-hidden" style={{ aspectRatio: '808/1280' }}>
         <Image
           src={getImageSrc(active, fallbackImage)}
           alt={productName}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover grayscale"
+          className="object-contain grayscale"
           priority
         />
       </div>
@@ -68,7 +68,7 @@ export function ProductImageGallery({
                 alt={`${productName} view ${idx + 1}`}
                 fill
                 sizes="64px"
-                className="object-cover grayscale"
+                className="object-contain grayscale"
               />
             </button>
           ))}
