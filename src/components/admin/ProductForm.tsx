@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
@@ -29,6 +30,7 @@ interface SpecRow {
 
 export function ProductForm({ product, categories }: ProductFormProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isPublished, setIsPublished] = useState(product?.is_published ?? false);
   const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false);
@@ -102,11 +104,12 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       if (result?.error) {
         toast(result.error, "error");
+      } else if (!product && "product" in result && result.product && typeof result.product === "object" && "id" in result.product) {
+        toast("Product created — add images below", "success");
+        router.push(`/admin/products/${(result.product as { id: string }).id}`);
       } else {
-        toast(
-          product ? "Product updated" : "Product created",
-          "success"
-        );
+        toast("Product updated", "success");
+        router.refresh();
       }
     });
   }

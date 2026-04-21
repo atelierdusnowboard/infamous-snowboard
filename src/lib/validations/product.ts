@@ -9,7 +9,7 @@ export const productSchema = z.object({
   tagline: z.string().optional(),
   description: z.string().optional(),
   price: z.number().positive("Price must be positive"),
-  category_id: z.string().uuid("Invalid category").optional().or(z.literal("")),
+  category_id: z.string().uuid("Invalid category").optional().nullable().or(z.literal("")),
   specs: z.record(z.string(), z.unknown()).default({}),
   is_published: z.boolean().default(false),
   is_featured: z.boolean().default(false),
