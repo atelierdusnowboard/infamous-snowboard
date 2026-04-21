@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getProducts } from "@/lib/queries/products";
+import { getProducts, getProductsByCategory } from "@/lib/queries/products";
 import { getCategories } from "@/lib/queries/categories";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductFilters } from "@/components/product/ProductFilters";
@@ -28,21 +28,16 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   let categories: Category[] = [];
 
   try {
-    [products, categories] = await Promise.all([
-      getProducts(),
-      getCategories(),
-    ]);
+    categories = await getCategories();
+    // Use junction table query when filtering by category
+    products = params.category
+      ? await getProductsByCategory(params.category)
+      : await getProducts();
   } catch {
     // DB not configured yet
   }
 
-  // Client-side filter simulation (specs filtering is done client-side here)
-  let filtered = products;
-  if (params.category) {
-    filtered = filtered.filter(
-      (p) => p.categories?.slug === params.category
-    );
-  }
+  const filtered = products;
 
   return (
     <div className="max-w-screen-xl mx-auto px-4 py-12">
