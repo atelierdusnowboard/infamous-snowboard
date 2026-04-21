@@ -28,6 +28,14 @@ export async function createClient(): Promise<ReturnType<typeof createServerClie
   );
 }
 
+// Public anon client — no cookies, safe for SSG/static rendering
+export function createPublicClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
 // Service role client — bypasses RLS, use only in trusted server-side admin actions
 export function createServiceClient() {
   return createSupabaseClient(

@@ -1,10 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
 
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
 
 export async function getCategories(navOnly = false): Promise<Category[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   if (navOnly) {
     const { data, error } = await supabase
@@ -13,24 +13,9 @@ export async function getCategories(navOnly = false): Promise<Category[]> {
       .eq("show_in_nav", true)
       .order("sort_order", { ascending: true });
 
-    // If show_in_nav column doesn't exist yet, fall back to all categories
-    if (error) {
-      const { data: fallback } = await supabase
-        .from("categories")
-        .select("*")
-        .order("name", { ascending: true });
-      return fallback ?? [];
-    }
-    return data ?? [];
-  }
+    if (!error) return data ?? [];
 
-  const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .order("sort_order", { ascending: true });
-
-  // Fallback if sort_order column doesn't exist yet
-  if (error) {
+    // Fallback if show_in_nav column doesn't exist yet
     const { data: fallback } = await supabase
       .from("categories")
       .select("*")
@@ -38,5 +23,17 @@ export async function getCategories(navOnly = false): Promise<Category[]> {
     return fallback ?? [];
   }
 
-  return data ?? [];
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .order("sort_order", { ascending: true });
+
+  if (!error) return data ?? [];
+
+  // Fallback if sort_order column doesn't exist yet
+  const { data: fallback } = await supabase
+    .from("categories")
+    .select("*")
+    .order("name", { ascending: true });
+  return fallback ?? [];
 }
