@@ -80,16 +80,16 @@ export async function createCheckoutSession(
 
   // Build Stripe line items
   const lineItems = cartItems.map((item) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: item.size ? `${item.name} — ${item.size} cm` : item.name,
-          ...(item.image ? { images: [] } : {}),
-        },
-        unit_amount: Math.round(item.price * 100),
+    price_data: {
+      currency: "eur",
+      product_data: {
+        name: item.size ? `${item.name} — ${item.size} cm` : item.name,
+        ...(item.image ? { images: [item.image] } : {}),
       },
-      quantity: item.quantity,
-    }));
+      unit_amount: Math.round(item.price * 100),
+    },
+    quantity: item.quantity,
+  }));
 
   // Add shipping as a line item if applicable
   if (shippingCost > 0) {

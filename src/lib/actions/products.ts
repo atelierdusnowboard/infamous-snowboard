@@ -3,6 +3,42 @@
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { productSchema } from "@/lib/validations/product";
+import { getStripe } from "@/lib/stripe/server";
+
+async function syncToStripe(
+  productId: string,
+  name: string,
+  description: string | null,
+  imageUrl: string | null,
+  existingStripeId: string | null
+): Promise<string | null> {
+  try {
+    const stripe = getStripe();
+    const params = {
+      name,
+      description: description ?? undefined,
+      images: imageUrl ? [imageUrl] : undefined,
+      metadata: { infamous_product_id: productId },
+    };
+
+    let stripeProductId = existingStripeId;
+
+    if (stripeProductId) {
+      await stripe.products.update(stripeProductId, params);
+    } else {
+      const product = await stripe.products.create(params);
+      stripeProductId = product.id;
+      // Store Stripe product ID in DB
+      const supabase = createServiceClient();
+      await supabase.from("products").update({ stripe_product_id: stripeProductId }).eq("id", productId);
+    }
+
+    return stripeProductId;
+  } catch {
+    // Stripe sync is non-blocking — don't fail the product save
+    return null;
+  }
+}
 
 async function syncProductCategories(productId: string, categoryIds: string[]) {
   const supabase = createServiceClient();
@@ -42,7 +78,13 @@ export async function createProduct(formData: FormData, categoryIds: string[] = 
     .single();
 
   if (error) return { error: error.message };
-  if (data) await syncProductCategories(data.id, categoryIds);
+  if (data) {
+    await syncProductCategories(data.id, categoryIds);
+    // Sync to Stripe (non-blocking)
+    const { data: img } = await createServiceClient()
+      .from("product_images").select("storage_path").eq("product_id", data.id).eq("is_primary", true).single();
+    await syncToStripe(data.id, parsed.data.name, parsed.data.description ?? null, img?.storage_path ?? null, null);
+  }
   revalidatePath("/admin/products");
   revalidatePath("/shop", "layout");
   return { success: true, product: data };
@@ -77,6 +119,11 @@ export async function updateProduct(id: string, formData: FormData, categoryIds:
   if (error) return { error: error.message };
   // Always sync categories (even empty = remove all)
   await syncProductCategories(id, categoryIds);
+  // Sync to Stripe (non-blocking)
+  const sc = createServiceClient();
+  const { data: existing } = await sc.from("products").select("stripe_product_id").eq("id", id).single();
+  const { data: img } = await sc.from("product_images").select("storage_path").eq("product_id", id).eq("is_primary", true).single();
+  await syncToStripe(id, parsed.data.name, parsed.data.description ?? null, img?.storage_path ?? null, existing?.stripe_product_id ?? null);
   revalidatePath("/admin/products");
   revalidatePath(`/products/${parsed.data.slug}`);
   revalidatePath("/shop", "layout");
