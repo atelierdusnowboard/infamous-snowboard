@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getOrderById } from "@/lib/queries/orders";
 import { OrderDetail } from "@/components/account/OrderDetail";
-import { updateOrderStatus } from "@/lib/actions/orders";
+import { OrderStatusPanel } from "@/components/admin/OrderStatusPanel";
 
 export const metadata: Metadata = {
   title: "Admin — Order Detail",
@@ -14,14 +14,6 @@ interface AdminOrderDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-const statuses = [
-  "pending",
-  "confirmed",
-  "processing",
-  "shipped",
-  "delivered",
-  "cancelled",
-];
 
 export default async function AdminOrderDetailPage({
   params,
@@ -57,35 +49,7 @@ export default async function AdminOrderDetailPage({
         </div>
 
         <div>
-          <div className="border border-black">
-            <div className="px-4 py-3 border-b border-black">
-              <h3 className="text-xs font-bold uppercase tracking-widest">
-                Update Status
-              </h3>
-            </div>
-            <div className="p-4 space-y-2">
-              {statuses.map((status) => (
-                <form
-                  key={status}
-                  action={async () => {
-                    "use server";
-                    await updateOrderStatus(id, status);
-                  }}
-                >
-                  <button
-                    type="submit"
-                    className={`w-full px-4 py-2 text-xs font-bold uppercase tracking-widest border transition-colors ${
-                      order.status === status
-                        ? "bg-black text-white border-black"
-                        : "bg-white text-black border-black hover:bg-black hover:!text-white"
-                    }`}
-                  >
-                    {status}
-                  </button>
-                </form>
-              ))}
-            </div>
-          </div>
+          <OrderStatusPanel orderId={id} initialStatus={order.status} />
         </div>
       </div>
     </div>
