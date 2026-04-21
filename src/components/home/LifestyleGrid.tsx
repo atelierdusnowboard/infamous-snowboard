@@ -49,26 +49,15 @@ export function LifestyleGrid() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black">
-          {images.slice(0, 4).map((src, i) => (
+          {images.map((src, i) => (
             <div
               key={src}
-              className={`relative overflow-hidden bg-white ${i === 0 ? "md:row-span-2" : ""}`}
-              style={{ aspectRatio: i === 0 ? "1/2" : "1/1" }}
+              className={`relative overflow-hidden bg-white ${i === 0 ? "md:row-span-2" : "aspect-square"}`}
+              style={i === 0 ? { aspectRatio: "1/2" } : undefined}
             >
               <Image
                 src={src}
                 alt="Infamous rider"
-                fill
-                sizes="(max-width: 640px) 50vw, 25vw"
-                className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
-              />
-            </div>
-          ))}
-          {images.slice(4).map((src) => (
-            <div key={src} className="relative aspect-square overflow-hidden bg-white">
-              <Image
-                src={src}
-                alt="Infamous snowboard"
                 fill
                 sizes="(max-width: 640px) 50vw, 25vw"
                 className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
