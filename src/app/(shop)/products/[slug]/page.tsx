@@ -28,6 +28,8 @@ const BOARD_IMAGE_MAP: Record<string, string> = {
   "kids-boards": "/boards/2026 Infamous Kids Boards-01.JPG",
 };
 
+export const dynamic = "force-dynamic";
+
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }

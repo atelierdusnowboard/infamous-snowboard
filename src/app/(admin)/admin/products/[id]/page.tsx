@@ -6,6 +6,8 @@ import { getCategories } from "@/lib/queries/categories";
 import { ProductForm } from "@/components/admin/ProductForm";
 import type { ProductWithImages } from "@/types/product";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Admin — Edit Product",
   robots: { index: false, follow: false },
@@ -15,34 +17,22 @@ interface EditProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditProductPage({
-  params,
-}: EditProductPageProps) {
+export default async function EditProductPage({ params }: EditProductPageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
-  let product = null;
-  let categories = [];
+  const { data: product, error: productError } = await supabase
+    .from("products")
+    .select("*, categories(id,name,slug), product_images(id,storage_path,is_primary,sort_order)")
+    .eq("id", id)
+    .single();
 
-  try {
-    const [productRes, catsRes] = await Promise.all([
-      supabase
-        .from("products")
-        .select(
-          "*, categories(id,name,slug), product_images(id,storage_path,is_primary,sort_order)"
-        )
-        .eq("id", id)
-        .single(),
-      getCategories(),
-    ]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    product = productRes.data as any as ProductWithImages;
-    categories = catsRes;
-  } catch {
+  if (productError || !product) {
+    console.error("Product fetch error:", productError?.message);
     notFound();
   }
 
-  if (!product) notFound();
+  const categories = await getCategories();
 
   return (
     <div>
@@ -57,7 +47,7 @@ export default async function EditProductPage({
           Edit: {product.name}
         </h1>
       </div>
-      <ProductForm product={product} categories={categories} />
+      <ProductForm product={product as unknown as ProductWithImages} categories={categories} />
     </div>
   );
 }
