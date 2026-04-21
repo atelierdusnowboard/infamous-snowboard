@@ -12,21 +12,9 @@ import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { formatPrice } from "@/lib/utils/format";
 import { generateProductMetadata } from "@/lib/utils/seo";
 import ProductDetailClient from "./ProductDetailClient";
-import type { ProductWithImages } from "@/types/product";
+import { BOARD_FALLBACK_IMAGES, getProductImageUrl } from "@/lib/utils/image";
 
-// Static fallback data when Supabase is not configured
-const BOARD_IMAGE_MAP: Record<string, string> = {
-  gun: "/boards/2026 Infamous Gun-01.JPG",
-  "team-ripper": "/boards/2026 Infamous Ripper-01.JPG",
-  "nervous-love": "/boards/2026 Infamous Nervous Love-01.JPG",
-  "sanglier-sauvage": "/boards/2026 Infamous Sanglier Sauvage-01.JPG",
-  "dreamy-panda": "/boards/2026 Infamous Dreamy Panda-01.JPG",
-  "punk-cat": "/boards/2026 Infamous Punk Cat-01.JPG",
-  "park-rat": "/boards/2026 Infamous Park Rat-01.JPG",
-  "night-queen": "/boards/2026 Infamous Night Queen-01.JPG",
-  "lipstick-cam": "/boards/2026 Infamous LipStick Cam-01.JPG",
-  "kids-boards": "/boards/2026 Infamous Kids Boards-01.JPG",
-};
+const BOARD_IMAGE_MAP = BOARD_FALLBACK_IMAGES;
 
 export const dynamic = "force-dynamic";
 
@@ -86,9 +74,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     product.product_images.find((i) => i.is_primary) ??
     product.product_images[0];
   const imageUrl = primaryImage?.storage_path
-    ? primaryImage.storage_path.startsWith("http")
-      ? primaryImage.storage_path
-      : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${primaryImage.storage_path}`
+    ? getProductImageUrl(primaryImage.storage_path)
     : BOARD_IMAGE_MAP[slug] ?? null;
 
   return (

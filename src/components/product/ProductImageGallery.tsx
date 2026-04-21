@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import type { ProductImage } from "@/types/database";
+import { DEFAULT_FALLBACK, getProductImageUrl } from "@/lib/utils/image";
 
 interface ProductImageGalleryProps {
   images: ProductImage[];
@@ -13,14 +14,13 @@ interface ProductImageGalleryProps {
 
 function getImageSrc(img: ProductImage | undefined, fallback: string): string {
   if (!img) return fallback;
-  if (img.storage_path.startsWith("http")) return img.storage_path;
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${img.storage_path}`;
+  return getProductImageUrl(img.storage_path) ?? fallback;
 }
 
 export function ProductImageGallery({
   images,
   productName,
-  fallbackImage = "/boards/2026 Infamous Gun-01.JPG",
+  fallbackImage = DEFAULT_FALLBACK,
 }: ProductImageGalleryProps) {
   const sorted = [...images].sort((a, b) => {
     if (a.is_primary) return -1;
