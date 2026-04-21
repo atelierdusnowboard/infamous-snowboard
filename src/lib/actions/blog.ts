@@ -80,3 +80,19 @@ export async function deletePost(id: string) {
   revalidatePath("/blog");
   return { success: true };
 }
+
+export async function uploadBlogImage(file: File): Promise<{ url: string } | { error: string }> {
+  const { createServiceClient } = await import("@/lib/supabase/server");
+  const supabase = createServiceClient();
+  const ext = file.name.split(".").pop();
+  const path = `blog/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from("blog-images")
+    .upload(path, file, { contentType: file.type, upsert: false });
+
+  if (error) return { error: error.message };
+
+  const { data } = supabase.storage.from("blog-images").getPublicUrl(path);
+  return { url: data.publicUrl };
+}
