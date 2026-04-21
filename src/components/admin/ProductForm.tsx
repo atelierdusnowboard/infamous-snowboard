@@ -21,6 +21,7 @@ import type { Category } from "@/types/database";
 interface ProductFormProps {
   product?: ProductWithImages;
   categories: Category[];
+  initialCategoryIds?: string[];
 }
 
 interface SpecRow {
@@ -28,7 +29,7 @@ interface SpecRow {
   value: string;
 }
 
-export function ProductForm({ product, categories }: ProductFormProps) {
+export function ProductForm({ product, categories, initialCategoryIds }: ProductFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -37,7 +38,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
-    product?.category_id ? [product.category_id] : []
+    initialCategoryIds ?? (product?.category_id ? [product.category_id] : [])
   );
 
   function toggleCategory(id: string) {
@@ -98,9 +99,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     formData.set("is_featured", String(isFeatured));
 
     startTransition(async () => {
+      // Pass selectedCategoryIds directly (not via FormData) for reliability
       const result = product
-        ? await updateProduct(product.id, formData)
-        : await createProduct(formData);
+        ? await updateProduct(product.id, formData, selectedCategoryIds)
+        : await createProduct(formData, selectedCategoryIds);
 
       if (result?.error) {
         toast(result.error, "error");

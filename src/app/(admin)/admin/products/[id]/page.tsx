@@ -34,6 +34,16 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
   const categories = await getCategories();
 
+  // Load current categories from junction table
+  const { data: junctionRows } = await supabase
+    .from("product_categories")
+    .select("category_id")
+    .eq("product_id", id);
+
+  const initialCategoryIds = junctionRows && junctionRows.length > 0
+    ? junctionRows.map((r: { category_id: string }) => r.category_id)
+    : product.category_id ? [product.category_id] : [];
+
   return (
     <div>
       <div className="flex items-center gap-4 mb-8">
@@ -47,7 +57,11 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
           Edit: {product.name}
         </h1>
       </div>
-      <ProductForm product={product as unknown as ProductWithImages} categories={categories} />
+      <ProductForm
+        product={product as unknown as ProductWithImages}
+        categories={categories}
+        initialCategoryIds={initialCategoryIds}
+      />
     </div>
   );
 }

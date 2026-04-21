@@ -14,9 +14,8 @@ async function syncProductCategories(productId: string, categoryIds: string[]) {
   }
 }
 
-export async function createProduct(formData: FormData) {
-  const categoryIds = formData.getAll("category_ids") as string[];
-  const primaryCategoryId = categoryIds[0] ?? (formData.get("category_id") as string) ?? null;
+export async function createProduct(formData: FormData, categoryIds: string[] = []) {
+  const primaryCategoryId = categoryIds[0] ?? null;
 
   const raw = {
     name: formData.get("name") as string,
@@ -49,9 +48,8 @@ export async function createProduct(formData: FormData) {
   return { success: true, product: data };
 }
 
-export async function updateProduct(id: string, formData: FormData) {
-  const categoryIds = formData.getAll("category_ids") as string[];
-  const primaryCategoryId = categoryIds[0] ?? (formData.get("category_id") as string) ?? null;
+export async function updateProduct(id: string, formData: FormData, categoryIds: string[] = []) {
+  const primaryCategoryId = categoryIds[0] ?? null;
 
   const raw = {
     name: formData.get("name") as string,
