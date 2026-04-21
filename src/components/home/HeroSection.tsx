@@ -13,7 +13,7 @@ export function HeroSection() {
           fill
           priority
           sizes="100vw"
-          className="object-cover grayscale opacity-40"
+          className="object-cover object-top grayscale opacity-40"
         />
       </div>
 
