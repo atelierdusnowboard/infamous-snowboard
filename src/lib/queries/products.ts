@@ -41,16 +41,26 @@ export async function getProductBySlug(slug: string) {
 
 export async function getProductsByCategory(categorySlug: string) {
   const supabase = await createClient();
+
+  // First get the category id by slug
+  const { data: category } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("slug", categorySlug)
+    .single();
+
+  if (!category) return [] as ProductWithImages[];
+
   const { data, error } = await supabase
     .from("products")
     .select(
       `
       *,
-      categories!inner ( id, name, slug ),
+      categories ( id, name, slug ),
       product_images ( id, storage_path, is_primary, sort_order )
     `
     )
-    .eq("categories.slug", categorySlug)
+    .eq("category_id", category.id)
     .eq("is_published", true)
     .order("created_at", { ascending: false });
 
