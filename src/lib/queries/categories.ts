@@ -6,21 +6,37 @@ export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export async function getCategories(navOnly = false): Promise<Category[]> {
   const supabase = await createClient();
 
-  let query = supabase.from("categories").select("*");
-
   if (navOnly) {
-    // show_in_nav may not exist yet if migration 0004 hasn't run
-    try {
-      const { data, error } = await query
-        .eq("show_in_nav", true)
-        .order("sort_order", { ascending: true });
-      if (!error) return data ?? [];
-    } catch {
-      // fall through to unfiltered query
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("show_in_nav", true)
+      .order("sort_order", { ascending: true });
+
+    // If show_in_nav column doesn't exist yet, fall back to all categories
+    if (error) {
+      const { data: fallback } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name", { ascending: true });
+      return fallback ?? [];
     }
+    return data ?? [];
   }
 
-  const { data, error } = await query.order("name", { ascending: true });
-  if (error) throw new Error(error.message);
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .order("sort_order", { ascending: true });
+
+  // Fallback if sort_order column doesn't exist yet
+  if (error) {
+    const { data: fallback } = await supabase
+      .from("categories")
+      .select("*")
+      .order("name", { ascending: true });
+    return fallback ?? [];
+  }
+
   return data ?? [];
 }
