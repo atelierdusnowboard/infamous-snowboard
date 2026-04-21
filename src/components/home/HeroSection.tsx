@@ -8,7 +8,7 @@ export function HeroSection() {
       {/* Background lifestyle image */}
       <div className="absolute inset-0">
         <Image
-          src="/lifestyle/_DSC3365-2.jpg"
+          src="https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365-2 - Grande.jpeg"
           alt="Infamous Snowboard rider"
           fill
           priority
