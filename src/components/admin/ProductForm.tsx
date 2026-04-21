@@ -34,6 +34,15 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false);
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    product?.category_id ? [product.category_id] : []
+  );
+
+  function toggleCategory(id: string) {
+    setSelectedCategoryIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  }
   const [specRows, setSpecRows] = useState<SpecRow[]>(() => {
     if (!product?.specs || typeof product.specs !== "object" || Array.isArray(product.specs)) {
       return [];
@@ -188,23 +197,30 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           defaultValue={product?.price ?? ""}
         />
 
-        {/* Category */}
-        <div className="flex flex-col gap-1">
+        {/* Categories — multi-select via checkboxes */}
+        <div className="flex flex-col gap-2">
           <label className="text-xs font-bold uppercase tracking-widest">
-            Category
+            Categories
           </label>
-          <select
-            name="category_id"
-            defaultValue={product?.category_id ?? ""}
-            className="w-full px-4 py-3 border border-black bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-          >
-            <option value="">No category</option>
+          <div className="border border-black divide-y divide-black">
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
+              <label key={cat.id} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-black/5 transition-colors">
+                <input
+                  type="checkbox"
+                  name="category_ids"
+                  value={cat.id}
+                  checked={selectedCategoryIds.includes(cat.id)}
+                  onChange={() => toggleCategory(cat.id)}
+                  className="w-4 h-4 border border-black appearance-none checked:bg-black cursor-pointer shrink-0"
+                />
+                <span className="text-xs font-bold uppercase tracking-widest">{cat.name}</span>
+                {selectedCategoryIds[0] === cat.id && (
+                  <span className="ml-auto text-[9px] font-bold uppercase tracking-widest bg-black text-white px-1.5 py-0.5">Primary</span>
+                )}
+              </label>
             ))}
-          </select>
+          </div>
+          <p className="text-xs text-black/40">First selected = primary category</p>
         </div>
       </div>
 

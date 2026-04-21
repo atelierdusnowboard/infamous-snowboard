@@ -1,19 +1,37 @@
+"use client";
+
+import { useMemo } from "react";
 import Image from "next/image";
 
 const STORAGE = "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle";
 
-const lifestyleImages = [
-  { src: `${STORAGE}/_DSC3365 - Grande.jpeg`,   alt: "Infamous rider" },
-  { src: `${STORAGE}/_DSC3365-2 - Grande.jpeg`, alt: "Infamous rider" },
-  { src: `${STORAGE}/_DSC3407 - Grande.jpeg`,   alt: "Infamous snowboard" },
-  { src: `${STORAGE}/_DSC3421 - Grande.jpeg`,   alt: "Infamous rider" },
-  { src: `${STORAGE}/_DSC3432 - Grande.jpeg`,   alt: "Infamous snowboard" },
-  { src: `${STORAGE}/_DSC3441 - Grande.jpeg`,   alt: "Infamous rider" },
-  { src: `${STORAGE}/_DSC3454 - Grande.jpeg`,   alt: "Infamous snowboard" },
-  { src: `${STORAGE}/_DSC3461 - Grande.jpeg`,   alt: "Infamous rider" },
+const allImages = [
+  `${STORAGE}/_DSC3365 - Grande.jpeg`,
+  `${STORAGE}/_DSC3407 - Grande.jpeg`,
+  `${STORAGE}/_DSC3421 - Grande.jpeg`,
+  `${STORAGE}/_DSC3432 - Grande.jpeg`,
+  `${STORAGE}/_DSC3441 - Grande.jpeg`,
+  `${STORAGE}/_DSC3454 - Grande.jpeg`,
+  `${STORAGE}/_DSC3461 - Grande.jpeg`,
+  `${STORAGE}/_DSC3507 - Grande.jpeg`,
+  `${STORAGE}/_DSC3518 - Grande.jpeg`,
+  `${STORAGE}/_DSC3528 - Grande.jpeg`,
+  `${STORAGE}/_DSC3563 - Grande.jpeg`,
+  `${STORAGE}/_DSC3611 - Grande.jpeg`,
 ];
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export function LifestyleGrid() {
+  const images = useMemo(() => shuffle(allImages).slice(0, 8), []);
+
   return (
     <section className="py-16 md:py-24 border-t border-black">
       <div className="max-w-screen-xl mx-auto px-4">
@@ -27,26 +45,26 @@ export function LifestyleGrid() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black">
-          {lifestyleImages.slice(0, 4).map((img, i) => (
+          {images.slice(0, 4).map((src, i) => (
             <div
-              key={i}
+              key={src}
               className={`relative overflow-hidden bg-white ${i === 0 ? "md:row-span-2" : ""}`}
               style={{ aspectRatio: i === 0 ? "1/2" : "1/1" }}
             >
               <Image
-                src={img.src}
-                alt={img.alt}
+                src={src}
+                alt="Infamous rider"
                 fill
                 sizes="(max-width: 640px) 50vw, 25vw"
                 className="object-cover grayscale hover:grayscale-0 transition-all duration-500"
               />
             </div>
           ))}
-          {lifestyleImages.slice(4).map((img, i) => (
-            <div key={i + 4} className="relative aspect-square overflow-hidden bg-white">
+          {images.slice(4).map((src) => (
+            <div key={src} className="relative aspect-square overflow-hidden bg-white">
               <Image
-                src={img.src}
-                alt={img.alt}
+                src={src}
+                alt="Infamous snowboard"
                 fill
                 sizes="(max-width: 640px) 50vw, 25vw"
                 className="object-cover grayscale hover:grayscale-0 transition-all duration-500"

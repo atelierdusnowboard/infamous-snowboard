@@ -8,6 +8,7 @@ import type {
 export interface ProductWithImages extends Product {
   categories: Category | null;
   product_images: ProductImage[];
+  product_categories?: { categories: Category }[];
 }
 
 export interface ProductWithVariants extends ProductWithImages {

@@ -50,10 +50,31 @@ export async function getProductsByCategory(categorySlug: string) {
 
   if (!category) return [] as ProductWithImages[];
 
+  // Use junction table for multi-category support
+  const { data: junction } = await supabase
+    .from("product_categories")
+    .select("product_id")
+    .eq("category_id", category.id);
+
+  // Fallback to category_id if junction table doesn't exist yet
+  if (!junction) {
+    const { data, error } = await supabase
+      .from("products")
+      .select(SELECT_WITH_IMAGES)
+      .eq("category_id", category.id)
+      .eq("is_published", true)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ProductWithImages[];
+  }
+
+  if (junction.length === 0) return [] as ProductWithImages[];
+
+  const productIds = junction.map((j) => j.product_id);
   const { data, error } = await supabase
     .from("products")
     .select(SELECT_WITH_IMAGES)
-    .eq("category_id", category.id)
+    .in("id", productIds)
     .eq("is_published", true)
     .order("created_at", { ascending: false });
 

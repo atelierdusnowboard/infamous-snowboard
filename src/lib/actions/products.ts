@@ -4,14 +4,27 @@ import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { productSchema } from "@/lib/validations/product";
 
+async function syncProductCategories(productId: string, categoryIds: string[]) {
+  const supabase = createServiceClient();
+  await supabase.from("product_categories").delete().eq("product_id", productId);
+  if (categoryIds.length > 0) {
+    await supabase.from("product_categories").insert(
+      categoryIds.map((cid) => ({ product_id: productId, category_id: cid }))
+    );
+  }
+}
+
 export async function createProduct(formData: FormData) {
+  const categoryIds = formData.getAll("category_ids") as string[];
+  const primaryCategoryId = categoryIds[0] ?? (formData.get("category_id") as string) ?? null;
+
   const raw = {
     name: formData.get("name") as string,
     slug: formData.get("slug") as string,
     tagline: formData.get("tagline") as string,
     description: formData.get("description") as string,
     price: Number(formData.get("price")),
-    category_id: formData.get("category_id") as string,
+    category_id: primaryCategoryId || null,
     specs: JSON.parse((formData.get("specs") as string) ?? "{}"),
     is_published: formData.get("is_published") === "true",
     is_featured: formData.get("is_featured") === "true",
@@ -30,19 +43,23 @@ export async function createProduct(formData: FormData) {
     .single();
 
   if (error) return { error: error.message };
+  if (data && categoryIds.length > 0) await syncProductCategories(data.id, categoryIds);
   revalidatePath("/admin/products");
   revalidatePath("/shop");
   return { success: true, product: data };
 }
 
 export async function updateProduct(id: string, formData: FormData) {
+  const categoryIds = formData.getAll("category_ids") as string[];
+  const primaryCategoryId = categoryIds[0] ?? (formData.get("category_id") as string) ?? null;
+
   const raw = {
     name: formData.get("name") as string,
     slug: formData.get("slug") as string,
     tagline: formData.get("tagline") as string,
     description: formData.get("description") as string,
     price: Number(formData.get("price")),
-    category_id: formData.get("category_id") as string,
+    category_id: primaryCategoryId || null,
     specs: JSON.parse((formData.get("specs") as string) ?? "{}"),
     is_published: formData.get("is_published") === "true",
     is_featured: formData.get("is_featured") === "true",
@@ -60,6 +77,7 @@ export async function updateProduct(id: string, formData: FormData) {
     .eq("id", id);
 
   if (error) return { error: error.message };
+  if (categoryIds.length > 0) await syncProductCategories(id, categoryIds);
   revalidatePath("/admin/products");
   revalidatePath(`/products/${parsed.data.slug}`);
   return { success: true };
