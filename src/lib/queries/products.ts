@@ -1,15 +1,16 @@
 import { createPublicClient } from "@/lib/supabase/server";
 import type { ProductWithImages, ProductWithVariants } from "@/types/product";
 
+// Use explicit FK hint to avoid ambiguity with product_categories junction table
 const SELECT_WITH_IMAGES = `
   *,
-  categories ( id, name, slug ),
+  categories!category_id ( id, name, slug ),
   product_images ( id, storage_path, is_primary, sort_order )
 `;
 
 const SELECT_WITH_VARIANTS = `
   *,
-  categories ( id, name, slug ),
+  categories!category_id ( id, name, slug ),
   product_images ( id, storage_path, is_primary, sort_order ),
   product_variants ( id, size_cm, stock_qty, price_delta )
 `;
