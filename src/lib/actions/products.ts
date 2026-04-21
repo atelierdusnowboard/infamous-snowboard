@@ -43,9 +43,9 @@ export async function createProduct(formData: FormData) {
     .single();
 
   if (error) return { error: error.message };
-  if (data && categoryIds.length > 0) await syncProductCategories(data.id, categoryIds);
+  if (data) await syncProductCategories(data.id, categoryIds);
   revalidatePath("/admin/products");
-  revalidatePath("/shop");
+  revalidatePath("/shop", "layout");
   return { success: true, product: data };
 }
 
@@ -77,18 +77,23 @@ export async function updateProduct(id: string, formData: FormData) {
     .eq("id", id);
 
   if (error) return { error: error.message };
-  if (categoryIds.length > 0) await syncProductCategories(id, categoryIds);
+  // Always sync categories (even empty = remove all)
+  await syncProductCategories(id, categoryIds);
   revalidatePath("/admin/products");
   revalidatePath(`/products/${parsed.data.slug}`);
+  revalidatePath("/shop", "layout");
   return { success: true };
 }
 
 export async function deleteProduct(id: string) {
   const supabase = await createClient();
+  // Get slug before deleting for cache invalidation
+  const { data: product } = await supabase.from("products").select("slug").eq("id", id).single();
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/admin/products");
-  revalidatePath("/shop");
+  revalidatePath("/shop", "layout");
+  if (product?.slug) revalidatePath(`/products/${product.slug}`);
   return { success: true };
 }
 
