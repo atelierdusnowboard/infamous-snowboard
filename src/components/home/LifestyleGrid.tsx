@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 const STORAGE = "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle";
@@ -30,7 +30,11 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function LifestyleGrid() {
-  const images = useMemo(() => shuffle(allImages).slice(0, 8), []);
+  const [images, setImages] = useState(allImages.slice(0, 8));
+
+  useEffect(() => {
+    setImages(shuffle(allImages).slice(0, 8));
+  }, []);
 
   return (
     <section className="py-16 md:py-24 border-t border-black">
