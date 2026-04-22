@@ -81,17 +81,20 @@ export async function createCheckoutSession(
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   // Build Stripe line items
-  const lineItems = cartItems.map((item) => ({
-    price_data: {
-      currency: "eur",
-      product_data: {
-        name: item.size ? `${item.name} — ${item.size} cm` : item.name,
-        ...(item.image ? { images: [item.image] } : {}),
+  const lineItems = cartItems.map((item) => {
+    const imageUrl = item.image ? encodeURI(item.image) : null;
+    return {
+      price_data: {
+        currency: "eur",
+        product_data: {
+          name: item.size ? `${item.name} — ${item.size} cm` : item.name,
+          ...(imageUrl ? { images: [imageUrl] } : {}),
+        },
+        unit_amount: Math.round(item.price * 100),
       },
-      unit_amount: Math.round(item.price * 100),
-    },
-    quantity: item.quantity,
-  }));
+      quantity: item.quantity,
+    };
+  });
 
   // Add shipping as a line item if applicable
   if (shippingCost > 0) {
