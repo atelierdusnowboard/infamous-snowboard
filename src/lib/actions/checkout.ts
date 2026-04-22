@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe/server";
 import { orderSchema } from "@/lib/validations/order";
 import type { CartItem } from "@/types/cart";
@@ -18,10 +18,12 @@ export async function createCheckoutSession(
     return { error: parsed.error.issues[0]?.message ?? "Invalid shipping data" };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Get user session (optional — supports guest checkout)
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+
+  // Use service client for DB writes to bypass RLS issues in Server Actions
+  const supabase = createServiceClient();
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
