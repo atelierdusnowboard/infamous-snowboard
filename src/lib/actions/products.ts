@@ -8,7 +8,10 @@ import { getStripe } from "@/lib/stripe/server";
 
 const productVariantSchema = z.object({
   id: z.string().uuid().optional(),
-  size_cm: z.number().int().positive("Size must be a positive number"),
+  size_cm: z
+    .number()
+    .positive("Size must be a positive number")
+    .refine((value) => Number.isInteger(value * 2), "Size must use 0.5 cm increments"),
   stock_qty: z.number().int().min(0, "Stock must be zero or more"),
   price_delta: z.number(),
 });

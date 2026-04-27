@@ -352,7 +352,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
                   label="Size (cm)"
                   type="number"
                   min="1"
-                  step="1"
+                  step="0.5"
                   value={row.sizeCm}
                   onChange={(e) => updateVariantRow(idx, "sizeCm", e.target.value)}
                 />
