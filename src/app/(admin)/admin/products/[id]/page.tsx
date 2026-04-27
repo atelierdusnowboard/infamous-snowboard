@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/queries/categories";
 import { ProductForm } from "@/components/admin/ProductForm";
-import type { ProductWithImages } from "@/types/product";
+import type { ProductWithVariants } from "@/types/product";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
   const { data: product, error: productError } = await supabase
     .from("products")
-    .select("*, categories!category_id(id,name,slug), product_images(id,storage_path,is_primary,sort_order)")
+    .select("*, categories!category_id(id,name,slug), product_images(id,storage_path,is_primary,sort_order), product_variants(id,size_cm,stock_qty,price_delta,created_at)")
     .eq("id", id)
     .single();
 
@@ -58,7 +58,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
         </h1>
       </div>
       <ProductForm
-        product={product as unknown as ProductWithImages}
+        product={product as unknown as ProductWithVariants}
         categories={categories}
         initialCategoryIds={initialCategoryIds}
       />

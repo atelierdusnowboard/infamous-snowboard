@@ -1,9 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { productSchema } from "@/lib/validations/product";
 import { getStripe } from "@/lib/stripe/server";
+
+const productVariantSchema = z.object({
+  id: z.string().uuid().optional(),
+  size_cm: z.number().int().positive("Size must be a positive number"),
+  stock_qty: z.number().int().min(0, "Stock must be zero or more"),
+  price_delta: z.number(),
+});
+
+const productVariantsSchema = z
+  .array(productVariantSchema)
+  .superRefine((variants, ctx) => {
+    const seen = new Set<number>();
+
+    variants.forEach((variant, index) => {
+      if (seen.has(variant.size_cm)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Each size must be unique",
+          path: [index, "size_cm"],
+        });
+      }
+      seen.add(variant.size_cm);
+    });
+  });
 
 async function syncToStripe(
   productId: string,
@@ -50,6 +75,83 @@ async function syncProductCategories(productId: string, categoryIds: string[]) {
   }
 }
 
+async function syncProductVariants(
+  productId: string,
+  variants: Array<{
+    id?: string;
+    size_cm: number;
+    stock_qty: number;
+    price_delta: number;
+  }>
+) {
+  const supabase = createServiceClient();
+
+  const { data: existing, error: existingError } = await supabase
+    .from("product_variants")
+    .select("id")
+    .eq("product_id", productId);
+
+  if (existingError) {
+    throw new Error(existingError.message);
+  }
+
+  const keepIds = new Set(variants.flatMap((variant) => (variant.id ? [variant.id] : [])));
+  const deleteIds = (existing ?? [])
+    .map((variant) => variant.id)
+    .filter((id) => !keepIds.has(id));
+
+  if (deleteIds.length > 0) {
+    const { error: deleteError } = await supabase
+      .from("product_variants")
+      .delete()
+      .in("id", deleteIds);
+
+    if (deleteError) {
+      throw new Error(deleteError.message);
+    }
+  }
+
+  for (const variant of variants) {
+    if (variant.id) {
+      const { error: updateError } = await supabase
+        .from("product_variants")
+        .update({
+          size_cm: variant.size_cm,
+          stock_qty: variant.stock_qty,
+          price_delta: variant.price_delta,
+        })
+        .eq("id", variant.id)
+        .eq("product_id", productId);
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+      continue;
+    }
+
+    const { error: insertError } = await supabase.from("product_variants").insert({
+      product_id: productId,
+      size_cm: variant.size_cm,
+      stock_qty: variant.stock_qty,
+      price_delta: variant.price_delta,
+    });
+
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
+  }
+}
+
+function parseVariants(formData: FormData) {
+  try {
+    const rawVariants = formData.get("variants");
+    const parsedJson = rawVariants ? JSON.parse(rawVariants as string) : [];
+    return productVariantsSchema.safeParse(parsedJson);
+  } catch {
+    return productVariantsSchema.safeParse(null);
+  }
+}
+
 export async function createProduct(formData: FormData, categoryIds: string[] = []) {
   const primaryCategoryId = categoryIds[0] ?? null;
 
@@ -69,6 +171,10 @@ export async function createProduct(formData: FormData, categoryIds: string[] = 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid data" };
   }
+  const parsedVariants = parseVariants(formData);
+  if (!parsedVariants.success) {
+    return { error: parsedVariants.error.issues[0]?.message ?? "Invalid variants" };
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -80,12 +186,14 @@ export async function createProduct(formData: FormData, categoryIds: string[] = 
   if (error) return { error: error.message };
   if (data) {
     await syncProductCategories(data.id, categoryIds);
+    await syncProductVariants(data.id, parsedVariants.data);
     // Sync to Stripe (non-blocking)
     const { data: img } = await createServiceClient()
       .from("product_images").select("storage_path").eq("product_id", data.id).eq("is_primary", true).single();
     await syncToStripe(data.id, parsed.data.name, parsed.data.description ?? null, img?.storage_path ?? null, null);
   }
   revalidatePath("/admin/products");
+  revalidatePath(`/products/${parsed.data.slug}`);
   revalidatePath("/shop", "layout");
   return { success: true, product: data };
 }
@@ -109,8 +217,17 @@ export async function updateProduct(id: string, formData: FormData, categoryIds:
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid data" };
   }
+  const parsedVariants = parseVariants(formData);
+  if (!parsedVariants.success) {
+    return { error: parsedVariants.error.issues[0]?.message ?? "Invalid variants" };
+  }
 
   const supabase = await createClient();
+  const { data: existingProduct } = await supabase
+    .from("products")
+    .select("slug")
+    .eq("id", id)
+    .single();
   const { error } = await supabase
     .from("products")
     .update({ ...parsed.data, updated_at: new Date().toISOString() })
@@ -119,12 +236,16 @@ export async function updateProduct(id: string, formData: FormData, categoryIds:
   if (error) return { error: error.message };
   // Always sync categories (even empty = remove all)
   await syncProductCategories(id, categoryIds);
+  await syncProductVariants(id, parsedVariants.data);
   // Sync to Stripe (non-blocking)
   const sc = createServiceClient();
   const { data: existing } = await sc.from("products").select("stripe_product_id").eq("id", id).single();
   const { data: img } = await sc.from("product_images").select("storage_path").eq("product_id", id).eq("is_primary", true).single();
   await syncToStripe(id, parsed.data.name, parsed.data.description ?? null, img?.storage_path ?? null, existing?.stripe_product_id ?? null);
   revalidatePath("/admin/products");
+  if (existingProduct?.slug && existingProduct.slug !== parsed.data.slug) {
+    revalidatePath(`/products/${existingProduct.slug}`);
+  }
   revalidatePath(`/products/${parsed.data.slug}`);
   revalidatePath("/shop", "layout");
   return { success: true };

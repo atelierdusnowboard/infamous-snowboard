@@ -15,11 +15,11 @@ import {
 import type { ProductImage } from "@/types/database";
 import { useToast } from "@/components/ui/Toast";
 import { slugify } from "@/lib/utils/format";
-import type { ProductWithImages } from "@/types/product";
+import type { ProductWithVariants } from "@/types/product";
 import type { Category } from "@/types/database";
 
 interface ProductFormProps {
-  product?: ProductWithImages;
+  product?: ProductWithVariants;
   categories: Category[];
   initialCategoryIds?: string[];
 }
@@ -27,6 +27,13 @@ interface ProductFormProps {
 interface SpecRow {
   key: string;
   value: string;
+}
+
+interface VariantRow {
+  id?: string;
+  sizeCm: string;
+  stockQty: string;
+  priceDelta: string;
 }
 
 export function ProductForm({ product, categories, initialCategoryIds }: ProductFormProps) {
@@ -56,6 +63,17 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
     }));
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [variantRows, setVariantRows] = useState<VariantRow[]>(() =>
+    (product?.product_variants ?? [])
+      .slice()
+      .sort((a, b) => a.size_cm - b.size_cm)
+      .map((variant) => ({
+        id: variant.id,
+        sizeCm: String(variant.size_cm),
+        stockQty: String(variant.stock_qty),
+        priceDelta: String(variant.price_delta),
+      }))
+  );
   const [images, setImages] = useState<ProductImage[]>(
     product?.product_images
       ? [...product.product_images].sort((a, b) => {
@@ -87,6 +105,27 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
     );
   }
 
+  function addVariantRow() {
+    setVariantRows((prev) => [
+      ...prev,
+      { sizeCm: "", stockQty: "0", priceDelta: "0" },
+    ]);
+  }
+
+  function removeVariantRow(idx: number) {
+    setVariantRows((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateVariantRow(
+    idx: number,
+    field: keyof VariantRow,
+    value: string
+  ) {
+    setVariantRows((prev) =>
+      prev.map((row, i) => (i === idx ? { ...row, [field]: value } : row))
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -97,6 +136,24 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
     formData.set("specs", JSON.stringify(specs));
     formData.set("is_published", String(isPublished));
     formData.set("is_featured", String(isFeatured));
+    formData.set(
+      "variants",
+      JSON.stringify(
+        variantRows
+          .map((row) => ({
+            id: row.id,
+            size_cm: Number(row.sizeCm),
+            stock_qty: Number(row.stockQty),
+            price_delta: Number(row.priceDelta),
+          }))
+          .filter(
+            (row) =>
+              Number.isFinite(row.size_cm) &&
+              Number.isFinite(row.stock_qty) &&
+              Number.isFinite(row.price_delta)
+          )
+      )
+    );
 
     startTransition(async () => {
       // Pass selectedCategoryIds directly (not via FormData) for reliability
@@ -265,6 +322,62 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-xs font-bold uppercase tracking-widest">
+            Sizes
+          </label>
+          <Button type="button" variant="outline" size="sm" onClick={addVariantRow}>
+            + Add Size
+          </Button>
+        </div>
+        {variantRows.length > 0 ? (
+          <div className="border border-black divide-y divide-black">
+            {variantRows.map((row, idx) => (
+              <div
+                key={row.id ?? `new-${idx}`}
+                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 p-3 items-end"
+              >
+                <Input
+                  label="Size (cm)"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={row.sizeCm}
+                  onChange={(e) => updateVariantRow(idx, "sizeCm", e.target.value)}
+                />
+                <Input
+                  label="Stock"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={row.stockQty}
+                  onChange={(e) => updateVariantRow(idx, "stockQty", e.target.value)}
+                />
+                <Input
+                  label="Price Delta (EUR)"
+                  type="number"
+                  step="0.01"
+                  value={row.priceDelta}
+                  onChange={(e) => updateVariantRow(idx, "priceDelta", e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeVariantRow(idx)}
+                  className="h-[50px] px-3 border border-black text-xs font-bold uppercase tracking-widest hover:bg-black hover:!text-white transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-black/40 uppercase tracking-widest py-4 text-center border border-black/20 border-dashed">
+            No sizes yet
+          </p>
         )}
       </div>
 
