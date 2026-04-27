@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -39,6 +39,8 @@ interface VariantRow {
 export function ProductForm({ product, categories, initialCategoryIds }: ProductFormProps) {
   const { toast } = useToast();
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const saveAsDraftRef = useRef(false);
   const [isPending, startTransition] = useTransition();
   const [isPublished, setIsPublished] = useState(product?.is_published ?? false);
   const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false);
@@ -129,12 +131,14 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const saveAsDraft = saveAsDraftRef.current;
+    saveAsDraftRef.current = false;
     const specs: Record<string, string> = {};
     specRows.forEach(({ key, value }) => {
       if (key.trim()) specs[key.trim()] = value;
     });
     formData.set("specs", JSON.stringify(specs));
-    formData.set("is_published", String(isPublished));
+    formData.set("is_published", String(saveAsDraft ? false : isPublished));
     formData.set("is_featured", String(isFeatured));
     formData.set(
       "variants",
@@ -167,6 +171,9 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
         toast("Product created — add images below", "success");
         router.push(`/admin/products/${(result.product as { id: string }).id}`);
       } else {
+        if (saveAsDraft) {
+          setIsPublished(false);
+        }
         toast("Product updated", "success");
         router.refresh();
       }
@@ -223,7 +230,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
       <div className="space-y-4">
         <Input
           name="name"
@@ -483,7 +490,8 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
           variant="outline"
           size="md"
           onClick={() => {
-            setIsPublished(false);
+            saveAsDraftRef.current = true;
+            formRef.current?.requestSubmit();
           }}
         >
           Save as Draft

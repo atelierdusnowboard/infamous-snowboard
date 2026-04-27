@@ -142,6 +142,23 @@ async function syncProductVariants(
   }
 }
 
+async function revalidateProductViews(productId: string) {
+  const supabase = createServiceClient();
+  const { data: product } = await supabase
+    .from("products")
+    .select("slug")
+    .eq("id", productId)
+    .single();
+
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/shop", "layout");
+  revalidatePath("/");
+
+  if (product?.slug) {
+    revalidatePath(`/products/${product.slug}`);
+  }
+}
+
 function parseVariants(formData: FormData) {
   try {
     const rawVariants = formData.get("variants");
@@ -296,8 +313,7 @@ export async function uploadProductImage(
     .single();
 
   if (dbError) return { error: dbError.message };
-  revalidatePath(`/admin/products/${productId}`);
-  revalidatePath(`/products`);
+  await revalidateProductViews(productId);
   return { success: true, image: data };
 }
 
@@ -317,8 +333,7 @@ export async function setProductImagePrimary(imageId: string, productId: string)
     .eq("id", imageId);
 
   if (error) return { error: error.message };
-  revalidatePath(`/admin/products/${productId}`);
-  revalidatePath(`/products`);
+  await revalidateProductViews(productId);
   return { success: true };
 }
 
@@ -333,6 +348,6 @@ export async function deleteProductImage(imageId: string, storagePath: string, p
     .eq("id", imageId);
 
   if (error) return { error: error.message };
-  revalidatePath(`/admin/products/${productId}`);
+  await revalidateProductViews(productId);
   return { success: true };
 }
