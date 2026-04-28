@@ -1,17 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getCategories } from "@/lib/queries/categories";
 import { deleteProduct } from "@/lib/actions/products";
-import { formatPrice, formatDate } from "@/lib/utils/format";
+import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
+import { CategoryFilter } from "./CategoryFilter";
 
 export const metadata: Metadata = {
   title: "Admin — Products",
   robots: { index: false, follow: false },
 };
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
   const supabase = await createClient();
+
+  const categories = await getCategories();
+
   let products: Array<{
     id: string;
     name: string;
@@ -23,11 +34,32 @@ export default async function AdminProductsPage() {
   }> = [];
 
   try {
-    const { data } = await supabase
-      .from("products")
-      .select("id, name, slug, price, is_published, is_featured, created_at")
-      .order("created_at", { ascending: false });
-    products = data ?? [];
+    if (category) {
+      const cat = categories.find((c) => c.slug === category);
+      if (cat) {
+        const { data: ids } = await supabase
+          .from("product_categories")
+          .select("product_id")
+          .eq("category_id", cat.id);
+
+        const productIds = (ids ?? []).map((r) => r.product_id);
+
+        if (productIds.length > 0) {
+          const { data } = await supabase
+            .from("products")
+            .select("id, name, slug, price, is_published, is_featured, created_at")
+            .in("id", productIds)
+            .order("created_at", { ascending: false });
+          products = data ?? [];
+        }
+      }
+    } else {
+      const { data } = await supabase
+        .from("products")
+        .select("id, name, slug, price, is_published, is_featured, created_at")
+        .order("created_at", { ascending: false });
+      products = data ?? [];
+    }
   } catch {
     // DB not configured
   }
@@ -43,6 +75,10 @@ export default async function AdminProductsPage() {
         </Link>
       </div>
 
+      <Suspense>
+        <CategoryFilter categories={categories} />
+      </Suspense>
+
       <div className="border border-black">
         <div className="grid grid-cols-5 px-4 py-3 border-b border-black bg-black text-white text-xs font-bold uppercase tracking-widest">
           <span className="col-span-2">Name</span>
@@ -54,7 +90,7 @@ export default async function AdminProductsPage() {
         {products.length === 0 ? (
           <div className="py-12 text-center">
             <p className="text-xs text-black/40 uppercase tracking-widest">
-              No products yet.
+              {category ? "Aucun produit dans cette catégorie." : "No products yet."}
             </p>
           </div>
         ) : (
@@ -113,6 +149,12 @@ export default async function AdminProductsPage() {
           ))
         )}
       </div>
+
+      {products.length > 0 && (
+        <p className="mt-3 text-xs text-black/40 uppercase tracking-widest text-right">
+          {products.length} produit{products.length > 1 ? "s" : ""}
+        </p>
+      )}
     </div>
   );
 }
