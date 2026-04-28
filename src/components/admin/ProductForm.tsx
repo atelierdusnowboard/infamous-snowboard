@@ -32,6 +32,7 @@ interface SpecRow {
 interface VariantRow {
   id?: string;
   sizeCm: string;
+  isWide: boolean;
   stockQty: string;
   priceDelta: string;
 }
@@ -72,6 +73,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
       .map((variant) => ({
         id: variant.id,
         sizeCm: String(variant.size_cm),
+        isWide: variant.is_wide,
         stockQty: String(variant.stock_qty),
         priceDelta: String(variant.price_delta),
       }))
@@ -110,7 +112,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
   function addVariantRow() {
     setVariantRows((prev) => [
       ...prev,
-      { sizeCm: "", stockQty: "0", priceDelta: "0" },
+      { sizeCm: "", isWide: false, stockQty: "0", priceDelta: "0" },
     ]);
   }
 
@@ -121,7 +123,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
   function updateVariantRow(
     idx: number,
     field: keyof VariantRow,
-    value: string
+    value: string | boolean
   ) {
     setVariantRows((prev) =>
       prev.map((row, i) => (i === idx ? { ...row, [field]: value } : row))
@@ -147,6 +149,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
           .map((row) => ({
             id: row.id,
             size_cm: Number(row.sizeCm),
+            is_wide: row.isWide,
             stock_qty: Number(row.stockQty),
             price_delta: Number(row.priceDelta),
           }))
@@ -346,7 +349,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
             {variantRows.map((row, idx) => (
               <div
                 key={row.id ?? `new-${idx}`}
-                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 p-3 items-end"
+                className="grid grid-cols-[1fr_auto_1fr_1fr_auto] gap-3 p-3 items-end"
               >
                 <Input
                   label="Size (cm)"
@@ -356,6 +359,15 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
                   value={row.sizeCm}
                   onChange={(e) => updateVariantRow(idx, "sizeCm", e.target.value)}
                 />
+                <label className="flex h-[50px] items-center gap-2 border border-black px-3">
+                  <input
+                    type="checkbox"
+                    checked={row.isWide}
+                    onChange={(e) => updateVariantRow(idx, "isWide", e.target.checked)}
+                    className="w-4 h-4 border border-black appearance-none checked:bg-black cursor-pointer"
+                  />
+                  <span className="text-xs font-bold uppercase tracking-widest">Wide</span>
+                </label>
                 <Input
                   label="Stock"
                   type="number"

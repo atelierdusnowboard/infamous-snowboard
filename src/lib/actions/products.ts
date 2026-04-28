@@ -12,6 +12,7 @@ const productVariantSchema = z.object({
     .number()
     .positive("Size must be a positive number")
     .refine((value) => Number.isInteger(value * 2), "Size must use 0.5 cm increments"),
+  is_wide: z.boolean().default(false),
   stock_qty: z.number().int().min(0, "Stock must be zero or more"),
   price_delta: z.number(),
 });
@@ -19,17 +20,19 @@ const productVariantSchema = z.object({
 const productVariantsSchema = z
   .array(productVariantSchema)
   .superRefine((variants, ctx) => {
-    const seen = new Set<number>();
+    const seen = new Set<string>();
 
     variants.forEach((variant, index) => {
-      if (seen.has(variant.size_cm)) {
+      const key = `${variant.size_cm}:${variant.is_wide ? "wide" : "standard"}`;
+
+      if (seen.has(key)) {
         ctx.addIssue({
           code: "custom",
-          message: "Each size must be unique",
+          message: "Each size/width combination must be unique",
           path: [index, "size_cm"],
         });
       }
-      seen.add(variant.size_cm);
+      seen.add(key);
     });
   });
 
@@ -83,6 +86,7 @@ async function syncProductVariants(
   variants: Array<{
     id?: string;
     size_cm: number;
+    is_wide: boolean;
     stock_qty: number;
     price_delta: number;
   }>
@@ -120,6 +124,7 @@ async function syncProductVariants(
         .from("product_variants")
         .update({
           size_cm: variant.size_cm,
+          is_wide: variant.is_wide,
           stock_qty: variant.stock_qty,
           price_delta: variant.price_delta,
         })
@@ -135,6 +140,7 @@ async function syncProductVariants(
     const { error: insertError } = await supabase.from("product_variants").insert({
       product_id: productId,
       size_cm: variant.size_cm,
+      is_wide: variant.is_wide,
       stock_qty: variant.stock_qty,
       price_delta: variant.price_delta,
     });

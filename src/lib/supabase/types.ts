@@ -121,6 +121,7 @@ export interface Database {
           id: string;
           product_id: string;
           size_cm: number;
+          is_wide: boolean;
           stock_qty: number;
           price_delta: number;
           created_at: string;
@@ -129,6 +130,7 @@ export interface Database {
           id?: string;
           product_id: string;
           size_cm: number;
+          is_wide?: boolean;
           stock_qty?: number;
           price_delta?: number;
           created_at?: string;
@@ -137,6 +139,7 @@ export interface Database {
           id?: string;
           product_id?: string;
           size_cm?: number;
+          is_wide?: boolean;
           stock_qty?: number;
           price_delta?: number;
         };
@@ -249,6 +252,7 @@ export interface Database {
           product_slug: string;
           variant_id: string | null;
           size_cm: number | null;
+          is_wide: boolean;
           unit_price: number;
           quantity: number;
           subtotal: number;
@@ -263,6 +267,7 @@ export interface Database {
           product_slug: string;
           variant_id?: string | null;
           size_cm?: number | null;
+          is_wide?: boolean;
           unit_price: number;
           quantity: number;
           subtotal: number;
@@ -277,6 +282,7 @@ export interface Database {
           product_slug?: string;
           variant_id?: string | null;
           size_cm?: number | null;
+          is_wide?: boolean;
           unit_price?: number;
           quantity?: number;
           subtotal?: number;

@@ -42,6 +42,7 @@ export function AddToCartButton({
       slug: productSlug,
       price: basePrice + selectedVariant.price_delta,
       size: selectedVariant.size_cm,
+      isWide: selectedVariant.is_wide,
       image: imageUrl,
       quantity: 1,
     });

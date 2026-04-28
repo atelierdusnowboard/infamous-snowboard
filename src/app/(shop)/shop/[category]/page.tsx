@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getCategories } from "@/lib/queries/categories";
 import { getProductsByCategory } from "@/lib/queries/products";
+import { ProductFilters } from "@/components/product/ProductFilters";
 import { ProductGrid } from "@/components/product/ProductGrid";
+import type { Category } from "@/types/database";
+import type { ProductWithImages } from "@/types/product";
+import {
+  applyProductFilters,
+  buildFilterSections,
+  getProductFamily,
+} from "@/lib/utils/productFilters";
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
+  searchParams: Promise<{
+    size?: string;
+    wide?: string;
+    [key: string]: string | undefined;
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -28,14 +42,21 @@ export async function generateMetadata({
   return { title: capitalised };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { category } = await params;
-  let products = [];
+  const filters = await searchParams;
+  let products: ProductWithImages[] = [];
+  let categories: Category[] = [];
   try {
+    categories = await getCategories();
     products = await getProductsByCategory(category);
   } catch {
     notFound();
   }
+
+  const family = getProductFamily(category);
+  const filterSections = buildFilterSections(products, family);
+  const filtered = applyProductFilters(products, filters);
 
   const title = category
     .split("-")
@@ -52,7 +73,19 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           {title}
         </h1>
       </div>
-      <ProductGrid products={products} />
+      <div className="flex flex-col lg:flex-row gap-12">
+        <Suspense fallback={null}>
+          <ProductFilters
+            categories={categories}
+            sections={filterSections}
+            showCategoryFilter={false}
+            resetHref={`/shop/${category}`}
+          />
+        </Suspense>
+        <div className="flex-1">
+          <ProductGrid products={filtered} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -38,3 +38,8 @@ export function estimateReadingTime(content: string): number {
   const words = content.trim().split(/\s+/).length;
   return Math.ceil(words / wordsPerMinute);
 }
+
+export function formatBoardSize(size: number | null, isWide: boolean = false): string {
+  if (size === null) return "";
+  return `${size}${isWide ? "W" : ""}`;
+}

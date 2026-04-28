@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
-import { formatPrice } from "@/lib/utils/format";
+import { formatBoardSize, formatPrice } from "@/lib/utils/format";
 
 export function OrderSummary() {
   const items = useCartStore((s) => s.items);
@@ -39,7 +39,7 @@ export function OrderSummary() {
               </p>
               {item.size && (
                 <p className="text-xs text-black/40 mt-0.5">
-                  {item.size} cm
+                  {formatBoardSize(item.size, item.isWide)} cm
                 </p>
               )}
               <p className="text-xs mt-1">

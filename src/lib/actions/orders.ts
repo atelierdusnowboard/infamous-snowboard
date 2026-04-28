@@ -54,6 +54,7 @@ export async function createOrder(
     product_slug: item.slug,
     variant_id: item.variantId,
     size_cm: item.size ?? null,
+    is_wide: item.isWide,
     unit_price: item.price,
     quantity: item.quantity,
     subtotal: item.price * item.quantity,
