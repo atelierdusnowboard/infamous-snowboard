@@ -2,7 +2,6 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe/server";
-import { formatBoardSize } from "@/lib/utils/format";
 import { orderSchema } from "@/lib/validations/order";
 import type { CartItem } from "@/types/cart";
 
@@ -64,8 +63,7 @@ export async function createCheckoutSession(
     product_name: item.name,
     product_slug: item.slug,
     variant_id: item.variantId,
-    size_cm: item.size ?? null,
-    is_wide: item.isWide,
+    size: item.size ?? null,
     unit_price: item.price,
     quantity: item.quantity,
     subtotal: item.price * item.quantity,
@@ -89,7 +87,7 @@ export async function createCheckoutSession(
       price_data: {
         currency: "eur",
         product_data: {
-          name: item.size ? `${item.name} — ${formatBoardSize(item.size, item.isWide)} cm` : item.name,
+          name: item.size ? `${item.name} — ${item.size}` : item.name,
           ...(imageUrl ? { images: [imageUrl] } : {}),
         },
         unit_amount: Math.round(item.price * 100),

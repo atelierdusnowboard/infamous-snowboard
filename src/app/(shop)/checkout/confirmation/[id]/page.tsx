@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrderById } from "@/lib/queries/orders";
-import { formatBoardSize, formatPrice, formatDate } from "@/lib/utils/format";
+import { formatPrice, formatDate } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
@@ -107,9 +107,9 @@ export default async function ConfirmationPage({
                   <p className="text-xs font-bold uppercase tracking-widest">
                     {item.product_name}
                   </p>
-                  {item.size_cm && (
+                  {item.size && (
                     <p className="text-xs text-black/40 mt-0.5">
-                      {formatBoardSize(item.size_cm, item.is_wide)} cm
+                      {item.size}
                     </p>
                   )}
                 </div>

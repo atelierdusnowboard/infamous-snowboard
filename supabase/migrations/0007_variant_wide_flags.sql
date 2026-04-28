@@ -1,5 +1,0 @@
-ALTER TABLE public.product_variants
-ADD COLUMN IF NOT EXISTS is_wide BOOLEAN NOT NULL DEFAULT false;
-
-ALTER TABLE public.order_items
-ADD COLUMN IF NOT EXISTS is_wide BOOLEAN NOT NULL DEFAULT false;

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
-import { formatBoardSize, formatPrice } from "@/lib/utils/format";
+import { formatPrice } from "@/lib/utils/format";
 import type { CartItem as CartItemType } from "@/types/cart";
 
 interface CartItemProps {
@@ -36,7 +36,7 @@ export function CartItem({ item }: CartItemProps) {
         </p>
         {item.size && (
           <p className="text-xs text-black/40 mt-0.5 uppercase tracking-widest">
-            {formatBoardSize(item.size, item.isWide)} cm
+            {item.size}
           </p>
         )}
         <p className="text-xs font-bold mt-1">{formatPrice(item.price)}</p>

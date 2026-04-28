@@ -6,14 +6,14 @@ const SELECT_WITH_IMAGES = `
   *,
   categories!category_id ( id, name, slug ),
   product_images ( id, storage_path, is_primary, sort_order ),
-  product_variants ( id, size_cm, is_wide, stock_qty, price_delta )
+  product_variants ( id, size, stock_qty, price_delta )
 `;
 
 const SELECT_WITH_VARIANTS = `
   *,
   categories!category_id ( id, name, slug ),
   product_images ( id, storage_path, is_primary, sort_order ),
-  product_variants ( id, size_cm, is_wide, stock_qty, price_delta )
+  product_variants ( id, size, stock_qty, price_delta )
 `;
 
 export async function getProducts() {

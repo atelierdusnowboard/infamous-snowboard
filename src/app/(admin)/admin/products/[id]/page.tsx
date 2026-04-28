@@ -23,7 +23,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
   const { data: product, error: productError } = await supabase
     .from("products")
-    .select("*, categories!category_id(id,name,slug), product_images(id,storage_path,is_primary,sort_order), product_variants(id,size_cm,is_wide,stock_qty,price_delta,created_at)")
+    .select("*, categories!category_id(id,name,slug), product_images(id,storage_path,is_primary,sort_order), product_variants(id,size,stock_qty,price_delta,created_at)")
     .eq("id", id)
     .single();
 

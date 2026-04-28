@@ -4,8 +4,7 @@ export interface CartItem {
   name: string;
   slug: string;
   price: number;
-  size: number | null;
-  isWide: boolean;
+  size: string | null;
   image: string | null;
   quantity: number;
 }

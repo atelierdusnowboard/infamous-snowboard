@@ -1,4 +1,3 @@
-import { formatBoardSize } from "@/lib/utils/format";
 import type { Category } from "@/types/database";
 import type { ProductWithImages } from "@/types/product";
 
@@ -36,10 +35,7 @@ const SPEC_KEY_BLACKLIST = new Set([
   "feature",
   "features",
   "length",
-  "size_cm",
   "sizes",
-  "wide",
-  "is_wide",
 ]);
 
 function normalizeValue(value: string): string {
@@ -114,11 +110,11 @@ export function getProductFamilyLabel(family: ProductFamily): string {
 }
 
 function buildSizeSection(products: ProductWithImages[]): FilterSection | null {
-  const sizeCounts = new Map<number, number>();
+  const sizeCounts = new Map<string, number>();
 
   products.forEach((product) => {
     const sizes = new Set(
-      (product.product_variants ?? []).map((variant) => variant.size_cm)
+      (product.product_variants ?? []).map((variant) => variant.size)
     );
 
     sizes.forEach((size) => {
@@ -132,26 +128,12 @@ function buildSizeSection(products: ProductWithImages[]): FilterSection | null {
     key: "size",
     label: "Size",
     options: [...sizeCounts.entries()]
-      .sort((a, b) => a[0] - b[0])
+      .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
       .map(([size, count]) => ({
-        label: formatBoardSize(size),
-        value: String(size),
+        label: size,
+        value: size,
         count,
       })),
-  };
-}
-
-function buildWideSection(products: ProductWithImages[]): FilterSection | null {
-  const count = products.filter((product) =>
-    (product.product_variants ?? []).some((variant) => variant.is_wide)
-  ).length;
-
-  if (count === 0) return null;
-
-  return {
-    key: "wide",
-    label: "Width",
-    options: [{ label: "Wide only", value: "true", count }],
   };
 }
 
@@ -243,26 +225,12 @@ export function buildFilterSections(
     sections.push(sizeSection);
   }
 
-  if (family === "boards") {
-    const wideSection = buildWideSection(products);
-
-    if (wideSection) sections.push(wideSection);
-  }
-
   sections.push(...buildSpecSections(products, family));
   return sections;
 }
 
-function matchesSize(product: ProductWithImages, selectedSize: string, wideOnly: boolean): boolean {
-  return (product.product_variants ?? []).some((variant) => {
-    if (String(variant.size_cm) !== selectedSize) return false;
-    if (wideOnly && !variant.is_wide) return false;
-    return true;
-  });
-}
-
-function matchesWide(product: ProductWithImages): boolean {
-  return (product.product_variants ?? []).some((variant) => variant.is_wide);
+function matchesSize(product: ProductWithImages, selectedSize: string): boolean {
+  return (product.product_variants ?? []).some((variant) => variant.size === selectedSize);
 }
 
 function matchesSpec(product: ProductWithImages, key: string, selectedValue: string): boolean {
@@ -276,14 +244,9 @@ export function applyProductFilters(
   searchParams: Record<string, string | undefined>
 ): ProductWithImages[] {
   const selectedSize = searchParams.size;
-  const wideOnly = searchParams.wide === "true";
 
   return products.filter((product) => {
-    if (selectedSize && !matchesSize(product, selectedSize, wideOnly)) {
-      return false;
-    }
-
-    if (!selectedSize && wideOnly && !matchesWide(product)) {
+    if (selectedSize && !matchesSize(product, selectedSize)) {
       return false;
     }
 

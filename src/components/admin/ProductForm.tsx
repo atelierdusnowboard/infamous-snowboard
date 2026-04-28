@@ -31,8 +31,7 @@ interface SpecRow {
 
 interface VariantRow {
   id?: string;
-  sizeCm: string;
-  isWide: boolean;
+  size: string;
   stockQty: string;
   priceDelta: string;
 }
@@ -69,11 +68,10 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
   const [variantRows, setVariantRows] = useState<VariantRow[]>(() =>
     (product?.product_variants ?? [])
       .slice()
-      .sort((a, b) => a.size_cm - b.size_cm)
+      .sort((a, b) => a.size.localeCompare(b.size, undefined, { numeric: true }))
       .map((variant) => ({
         id: variant.id,
-        sizeCm: String(variant.size_cm),
-        isWide: variant.is_wide,
+        size: variant.size,
         stockQty: String(variant.stock_qty),
         priceDelta: String(variant.price_delta),
       }))
@@ -112,7 +110,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
   function addVariantRow() {
     setVariantRows((prev) => [
       ...prev,
-      { sizeCm: "", isWide: false, stockQty: "0", priceDelta: "0" },
+      { size: "", stockQty: "0", priceDelta: "0" },
     ]);
   }
 
@@ -123,7 +121,7 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
   function updateVariantRow(
     idx: number,
     field: keyof VariantRow,
-    value: string | boolean
+    value: string
   ) {
     setVariantRows((prev) =>
       prev.map((row, i) => (i === idx ? { ...row, [field]: value } : row))
@@ -148,14 +146,13 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
         variantRows
           .map((row) => ({
             id: row.id,
-            size_cm: Number(row.sizeCm),
-            is_wide: row.isWide,
+            size: row.size.trim(),
             stock_qty: Number(row.stockQty),
             price_delta: Number(row.priceDelta),
           }))
           .filter(
             (row) =>
-              Number.isFinite(row.size_cm) &&
+              row.size.length > 0 &&
               Number.isFinite(row.stock_qty) &&
               Number.isFinite(row.price_delta)
           )
@@ -349,25 +346,15 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
             {variantRows.map((row, idx) => (
               <div
                 key={row.id ?? `new-${idx}`}
-                className="grid grid-cols-[1fr_auto_1fr_1fr_auto] gap-3 p-3 items-end"
+                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-3 p-3 items-end"
               >
                 <Input
-                  label="Size (cm)"
-                  type="number"
-                  min="1"
-                  step="0.5"
-                  value={row.sizeCm}
-                  onChange={(e) => updateVariantRow(idx, "sizeCm", e.target.value)}
+                  label="Size (ex: 159, 159W, S, M, L)"
+                  type="text"
+                  placeholder="ex: 159W"
+                  value={row.size}
+                  onChange={(e) => updateVariantRow(idx, "size", e.target.value)}
                 />
-                <label className="flex h-[50px] items-center gap-2 border border-black px-3">
-                  <input
-                    type="checkbox"
-                    checked={row.isWide}
-                    onChange={(e) => updateVariantRow(idx, "isWide", e.target.checked)}
-                    className="w-4 h-4 border border-black appearance-none checked:bg-black cursor-pointer"
-                  />
-                  <span className="text-xs font-bold uppercase tracking-widest">Wide</span>
-                </label>
                 <Input
                   label="Stock"
                   type="number"

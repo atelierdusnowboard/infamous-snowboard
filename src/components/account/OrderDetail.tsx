@@ -1,4 +1,4 @@
-import { formatBoardSize, formatPrice, formatDate } from "@/lib/utils/format";
+import { formatPrice, formatDate } from "@/lib/utils/format";
 import { Badge } from "@/components/ui/Badge";
 import type { OrderWithItems } from "@/lib/queries/orders";
 
@@ -36,9 +36,9 @@ export function OrderDetail({ order }: OrderDetailProps) {
               <p className="text-xs font-bold uppercase tracking-widest">
                 {item.product_name}
               </p>
-              {item.size_cm && (
+              {item.size && (
                 <p className="text-xs text-black/40 mt-0.5">
-                  {formatBoardSize(item.size_cm, item.is_wide)} cm
+                  {item.size}
                 </p>
               )}
               <p className="text-xs text-black/40 mt-0.5">

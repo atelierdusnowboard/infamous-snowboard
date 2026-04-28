@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
-import { formatBoardSize } from "@/lib/utils/format";
 import type { ProductVariant } from "@/types/database";
 
 interface ProductSizeSelectorProps {
@@ -15,17 +14,15 @@ export function ProductSizeSelector({
   selectedVariantId,
   onSelect,
 }: ProductSizeSelectorProps) {
-  const sorted = [...variants].sort((a, b) => {
-    if (a.size_cm !== b.size_cm) return a.size_cm - b.size_cm;
-    if (a.is_wide === b.is_wide) return 0;
-    return a.is_wide ? 1 : -1;
-  });
+  const sorted = [...variants].sort((a, b) =>
+    a.size.localeCompare(b.size, undefined, { numeric: true })
+  );
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
         <label className="text-xs font-bold uppercase tracking-widest">
-          Size (cm)
+          Size
         </label>
         {selectedVariantId && (
           <span className="text-xs text-black/40 uppercase tracking-widest">
@@ -62,7 +59,7 @@ export function ProductSizeSelector({
                   <span className="absolute w-full border-t border-black/30 rotate-12" />
                 </span>
               )}
-              {formatBoardSize(variant.size_cm, variant.is_wide)}
+              {variant.size}
             </button>
           );
         })}

@@ -8,11 +8,7 @@ import { getStripe } from "@/lib/stripe/server";
 
 const productVariantSchema = z.object({
   id: z.string().uuid().optional(),
-  size_cm: z
-    .number()
-    .positive("Size must be a positive number")
-    .refine((value) => Number.isInteger(value * 2), "Size must use 0.5 cm increments"),
-  is_wide: z.boolean().default(false),
+  size: z.string().min(1, "Size is required").max(20, "Size too long"),
   stock_qty: z.number().int().min(0, "Stock must be zero or more"),
   price_delta: z.number(),
 });
@@ -23,13 +19,13 @@ const productVariantsSchema = z
     const seen = new Set<string>();
 
     variants.forEach((variant, index) => {
-      const key = `${variant.size_cm}:${variant.is_wide ? "wide" : "standard"}`;
+      const key = variant.size.trim().toLowerCase();
 
       if (seen.has(key)) {
         ctx.addIssue({
           code: "custom",
-          message: "Each size/width combination must be unique",
-          path: [index, "size_cm"],
+          message: "Each size must be unique",
+          path: [index, "size"],
         });
       }
       seen.add(key);
@@ -85,8 +81,7 @@ async function syncProductVariants(
   productId: string,
   variants: Array<{
     id?: string;
-    size_cm: number;
-    is_wide: boolean;
+    size: string;
     stock_qty: number;
     price_delta: number;
   }>
@@ -123,8 +118,7 @@ async function syncProductVariants(
       const { error: updateError } = await supabase
         .from("product_variants")
         .update({
-          size_cm: variant.size_cm,
-          is_wide: variant.is_wide,
+          size: variant.size,
           stock_qty: variant.stock_qty,
           price_delta: variant.price_delta,
         })
@@ -139,8 +133,7 @@ async function syncProductVariants(
 
     const { error: insertError } = await supabase.from("product_variants").insert({
       product_id: productId,
-      size_cm: variant.size_cm,
-      is_wide: variant.is_wide,
+      size: variant.size,
       stock_qty: variant.stock_qty,
       price_delta: variant.price_delta,
     });
