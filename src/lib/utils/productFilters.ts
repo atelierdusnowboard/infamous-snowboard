@@ -234,7 +234,11 @@ function matchesSize(product: ProductWithImages, selectedSize: string): boolean 
 }
 
 function matchesSpec(product: ProductWithImages, key: string, selectedValue: string): boolean {
-  return extractSpecValues(product, key)
+  if (!product.specs || typeof product.specs !== "object" || Array.isArray(product.specs)) return false;
+  const specs = product.specs as Record<string, unknown>;
+  const originalKey = Object.keys(specs).find((k) => k.trim().toLowerCase() === key);
+  if (!originalKey) return false;
+  return extractSpecValues(product, originalKey)
     .map((value) => normalizeValue(value))
     .includes(selectedValue);
 }
