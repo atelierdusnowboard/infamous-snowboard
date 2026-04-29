@@ -8,7 +8,6 @@ const STORAGE = "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/publ
 const allImages = [
   `${STORAGE}/_DSC3365 - Grande.jpeg`,
   `${STORAGE}/_DSC3407 - Grande.jpeg`,
-  `${STORAGE}/_DSC3421 - Grande.jpeg`,
   `${STORAGE}/_DSC3432 - Grande.jpeg`,
   `${STORAGE}/_DSC3441 - Grande.jpeg`,
   `${STORAGE}/_DSC3454 - Grande.jpeg`,
