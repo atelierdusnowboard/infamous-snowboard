@@ -6,7 +6,23 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { getFeaturedProducts } from "@/lib/queries/products";
+import { createPublicClient } from "@/lib/supabase/server";
 import type { ProductWithImages } from "@/types/product";
+
+const SUPABASE_URL = "https://cawrucyjiyrsctbqewtt.supabase.co";
+
+async function getLifestyleImages(): Promise<string[]> {
+  try {
+    const supabase = createPublicClient();
+    const { data } = await supabase.storage.from("lifestyle").list("", { limit: 100 });
+    if (!data) return [];
+    return data
+      .filter((f) => f.name.match(/\.(jpe?g|png|webp)$/i))
+      .map((f) => `${SUPABASE_URL}/storage/v1/object/public/lifestyle/${f.name}`);
+  } catch {
+    return [];
+  }
+}
 
 export default async function HomePage() {
   let featuredProducts: ProductWithImages[] = [];
@@ -15,6 +31,8 @@ export default async function HomePage() {
   } catch {
     // Supabase not configured yet — use empty array
   }
+
+  const lifestyleImages = await getLifestyleImages();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -28,7 +46,7 @@ export default async function HomePage() {
         <div className="relative">
           <FeaturedProducts products={featuredProducts} />
           <ManifestoSection />
-          <LifestyleGrid />
+          <LifestyleGrid images={lifestyleImages} />
 
           {/* Blog CTA */}
           <section className="py-16 border-t border-black">

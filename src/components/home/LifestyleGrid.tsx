@@ -3,22 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-const STORAGE = "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle";
-
-const allImages = [
-  `${STORAGE}/_DSC3365 - Grande.jpeg`,
-  `${STORAGE}/_DSC3407 - Grande.jpeg`,
-  `${STORAGE}/_DSC3432 - Grande.jpeg`,
-  `${STORAGE}/_DSC3441 - Grande.jpeg`,
-  `${STORAGE}/_DSC3454 - Grande.jpeg`,
-  `${STORAGE}/_DSC3461 - Grande.jpeg`,
-  `${STORAGE}/_DSC3507 - Grande.jpeg`,
-  `${STORAGE}/_DSC3518 - Grande.jpeg`,
-  `${STORAGE}/_DSC3528 - Grande.jpeg`,
-  `${STORAGE}/_DSC3563 - Grande.jpeg`,
-  `${STORAGE}/_DSC3611 - Grande.jpeg`,
-];
-
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -28,12 +12,14 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function LifestyleGrid() {
-  const [images, setImages] = useState(allImages.slice(0, 8));
+export function LifestyleGrid({ images }: { images: string[] }) {
+  const [displayed, setDisplayed] = useState(images.slice(0, 8));
 
   useEffect(() => {
-    setImages(shuffle(allImages).slice(0, 8));
-  }, []);
+    if (images.length > 0) setDisplayed(shuffle(images).slice(0, 8));
+  }, [images]);
+
+  if (displayed.length === 0) return null;
 
   return (
     <section className="py-16 md:py-24 border-t border-black">
@@ -48,7 +34,7 @@ export function LifestyleGrid() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black">
-          {images.map((src, i) => (
+          {displayed.map((src, i) => (
             <div
               key={src}
               className={`relative overflow-hidden bg-white ${i === 0 ? "md:row-span-2" : "aspect-square"}`}
