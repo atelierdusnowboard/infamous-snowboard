@@ -6,18 +6,18 @@ import Image from "next/image";
 const STORAGE = "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle";
 
 const allImages = [
-  `${STORAGE}/_DSC3365 - Grande.jpeg`,
-  `${STORAGE}/_DSC3407 - Grande.jpeg`,
-  `${STORAGE}/_DSC3421 - Grande.jpeg`,
-  `${STORAGE}/_DSC3432 - Grande.jpeg`,
-  `${STORAGE}/_DSC3441 - Grande.jpeg`,
-  `${STORAGE}/_DSC3454 - Grande.jpeg`,
-  `${STORAGE}/_DSC3461 - Grande.jpeg`,
-  `${STORAGE}/_DSC3507 - Grande.jpeg`,
-  `${STORAGE}/_DSC3518 - Grande.jpeg`,
-  `${STORAGE}/_DSC3528 - Grande.jpeg`,
-  `${STORAGE}/_DSC3563 - Grande.jpeg`,
-  `${STORAGE}/_DSC3611 - Grande.jpeg`,
+  `${STORAGE}/_DSC3365%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3407%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3421%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3432%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3441%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3454%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3461%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3507%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3518%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3528%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3563%20-%20Grande.jpeg`,
+  `${STORAGE}/_DSC3611%20-%20Grande.jpeg`,
 ];
 
 function shuffle<T>(arr: T[]): T[] {
