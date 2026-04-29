@@ -26,7 +26,7 @@ export function HeroSection() {
           Less Noise.<br />More Shapes.
         </h1>
         <p className="text-white/60 text-sm md:text-base max-w-sm mb-10 uppercase tracking-widest">
-          We build boards for riders who don&apos;t need a backstory.
+          Forget the fame, stay the same.
         </p>
         <div className="flex flex-wrap gap-4">
           <Link href="/shop">
