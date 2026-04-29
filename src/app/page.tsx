@@ -6,14 +6,14 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { getFeaturedProducts } from "@/lib/queries/products";
-import { createPublicClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { ProductWithImages } from "@/types/product";
 
 const SUPABASE_URL = "https://cawrucyjiyrsctbqewtt.supabase.co";
 
 async function getLifestyleImages(): Promise<string[]> {
   try {
-    const supabase = createPublicClient();
+    const supabase = createServiceClient();
     const { data } = await supabase.storage.from("lifestyle").list("", { limit: 100 });
     if (!data) return [];
     return data
