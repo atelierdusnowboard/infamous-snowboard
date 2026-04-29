@@ -52,7 +52,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     ? post.cover_image_path
     : post.cover_image_path
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog/${post.cover_image_path}`
-      : "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365%20-%20Grande.jpeg";
+      : "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365 - Grande.jpeg";
 
   return (
     <>
