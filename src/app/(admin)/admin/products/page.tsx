@@ -6,6 +6,7 @@ import { getCategories } from "@/lib/queries/categories";
 import { deleteProduct } from "@/lib/actions/products";
 import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 import { CategoryFilter } from "./CategoryFilter";
 
 export const metadata: Metadata = {
@@ -131,19 +132,13 @@ export default async function AdminProductsPage({
                 >
                   Edit
                 </Link>
-                <form
+                <DeleteButton
                   action={async () => {
                     "use server";
                     await deleteProduct(product.id);
                   }}
-                >
-                  <button
-                    type="submit"
-                    className="text-xs text-black/40 uppercase tracking-widest hover:text-black transition-colors"
-                  >
-                    Delete
-                  </button>
-                </form>
+                  confirmMessage={`Supprimer "${product.name}" ?`}
+                />
               </div>
             </div>
           ))

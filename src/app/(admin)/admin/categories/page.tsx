@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCategories } from "@/lib/queries/categories";
 import { createCategory, deleteCategory, toggleCategoryNav } from "@/lib/actions/categories";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 
 export const metadata: Metadata = {
   title: "Admin — Categories",
@@ -55,14 +56,11 @@ export default async function AdminCategoriesPage() {
 
               {/* Delete */}
               <div className="col-span-2 flex justify-end">
-                <form action={async () => { "use server"; await deleteCategory(cat.id); }}>
-                  <button
-                    type="submit"
-                    className="text-xs text-black/40 uppercase tracking-widest hover:text-black transition-colors"
-                  >
-                    Supprimer
-                  </button>
-                </form>
+                <DeleteButton
+                  action={async () => { "use server"; await deleteCategory(cat.id); }}
+                  label="Supprimer"
+                  confirmMessage={`Supprimer la catégorie "${cat.name}" ?`}
+                />
               </div>
             </div>
           ))

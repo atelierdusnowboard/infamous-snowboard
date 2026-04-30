@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { getBlogPostBySlug, getAllBlogSlugs } from "@/lib/queries/blog";
 import { BlogPostContent } from "@/components/blog/BlogPost";
 import { Badge } from "@/components/ui/Badge";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
-import { formatDate, estimateReadingTime, extractFirstImageFromMarkdown } from "@/lib/utils/format";
+import { formatDate, estimateReadingTime } from "@/lib/utils/format";
 import { generateBlogMetadata } from "@/lib/utils/seo";
 import { ShareButtons } from "@/components/blog/ShareButtons";
 
@@ -49,13 +48,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) notFound();
 
   const readingTime = estimateReadingTime(post.content);
-  const imageUrl = post.cover_image_path?.startsWith("http")
-    ? post.cover_image_path
-    : post.cover_image_path
-      ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog/${post.cover_image_path}`
-      : extractFirstImageFromMarkdown(post.content)
-        ?? "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365 - Grande.jpeg";
-
   const pageUrl = `https://www.infamous-snowboard.com/blog/${post.slug}`;
 
   return (
@@ -99,18 +91,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <span>{formatDate(post.published_at)}</span>
             )}
             <span>{readingTime} min read</span>
-          </div>
-
-          {/* Cover image */}
-          <div className="relative aspect-video overflow-hidden border border-black mb-10">
-            <Image
-              src={imageUrl}
-              alt={post.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 700px"
-              className="object-cover grayscale"
-              priority
-            />
           </div>
 
           {/* Content */}
