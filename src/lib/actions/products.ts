@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { productSchema } from "@/lib/validations/product";
 import { getStripe } from "@/lib/stripe/server";
+import { getProductImageUrl } from "@/lib/utils/image";
 
 const productVariantSchema = z.object({
   id: z.string().uuid().optional(),
@@ -41,10 +42,11 @@ async function syncToStripe(
 ): Promise<string | null> {
   try {
     const stripe = getStripe();
+    const fullImageUrl = getProductImageUrl(imageUrl);
     const params = {
       name,
       description: description || undefined,
-      images: imageUrl ? [imageUrl] : undefined,
+      images: fullImageUrl ? [encodeURI(fullImageUrl)] : undefined,
       metadata: { infamous_product_id: productId },
     };
 
@@ -268,6 +270,35 @@ export async function updateProduct(id: string, formData: FormData, categoryIds:
   revalidatePath(`/products/${parsed.data.slug}`);
   revalidatePath("/shop", "layout");
   return { success: true };
+}
+
+export async function syncAllProductsToStripe(): Promise<{ synced: number; errors: number }> {
+  const supabase = createServiceClient();
+  const { data: products } = await supabase
+    .from("products")
+    .select("id, name, description, slug, stripe_product_id, product_images(storage_path, is_primary)");
+
+  if (!products) return { synced: 0, errors: 0 };
+
+  let synced = 0;
+  let errors = 0;
+
+  for (const product of products) {
+    const images = product.product_images as { storage_path: string; is_primary: boolean }[];
+    const primary = images.find((i) => i.is_primary) ?? images[0];
+    const result = await syncToStripe(
+      product.id,
+      product.name,
+      product.description ?? null,
+      primary?.storage_path ?? null,
+      product.stripe_product_id ?? null
+    );
+    if (result) synced++;
+    else errors++;
+  }
+
+  revalidatePath("/admin/products");
+  return { synced, errors };
 }
 
 export async function deleteProduct(id: string) {

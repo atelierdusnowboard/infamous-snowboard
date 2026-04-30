@@ -7,6 +7,7 @@ import { deleteProduct } from "@/lib/actions/products";
 import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { SyncStripeButton } from "@/components/admin/SyncStripeButton";
 import { CategoryFilter } from "./CategoryFilter";
 
 export const metadata: Metadata = {
@@ -71,9 +72,12 @@ export default async function AdminProductsPage({
         <h1 className="text-2xl font-black uppercase tracking-widest">
           Products
         </h1>
-        <Link href="/admin/products/new">
-          <Button size="sm">+ New Product</Button>
-        </Link>
+        <div className="flex items-center gap-4">
+          <SyncStripeButton />
+          <Link href="/admin/products/new">
+            <Button size="sm">+ New Product</Button>
+          </Link>
+        </div>
       </div>
 
       <Suspense>
