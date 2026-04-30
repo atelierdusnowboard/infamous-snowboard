@@ -3,9 +3,10 @@
 interface ShareButtonsProps {
   url: string;
   title: string;
+  className?: string;
 }
 
-export function ShareButtons({ url, title }: ShareButtonsProps) {
+export function ShareButtons({ url, title, className = "flex items-center gap-3 pt-8 mt-8 border-t border-black" }: ShareButtonsProps) {
   const encoded = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 
@@ -14,7 +15,7 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
   }
 
   return (
-    <div className="flex items-center gap-3 pt-8 mt-8 border-t border-black">
+    <div className={className}>
       <span className="text-xs font-black uppercase tracking-widest text-black/40 mr-1">Share</span>
 
       {/* X / Twitter */}

@@ -27,7 +27,7 @@ export default function ProductDetailClient({
     : product.price;
 
   return (
-    <div className="space-y-8">
+    <div>
       {/* Category tag */}
       {product.categories && (
         <p className="text-xs font-bold uppercase tracking-widest text-black/40">
@@ -36,41 +36,41 @@ export default function ProductDetailClient({
       )}
 
       {/* Name */}
-      <h1 className="text-4xl md:text-5xl font-black uppercase tracking-widest leading-none">
+      <h1 className="text-4xl md:text-5xl font-black uppercase tracking-widest leading-none mt-3">
         {product.name}
       </h1>
 
       {/* Tagline */}
       {product.tagline && (
-        <p className="text-sm uppercase tracking-widest text-black/60">
+        <p className="text-sm uppercase tracking-widest text-black/60 mt-4">
           {product.tagline}
         </p>
       )}
 
       {/* Price */}
-      <p className="text-2xl font-black">{formatPrice(displayPrice)}</p>
+      <p className="text-2xl font-black mt-6">{formatPrice(displayPrice)}</p>
 
       {/* Description */}
       {product.description && (
-        <p className="text-sm leading-relaxed text-black/80">
+        <p className="text-sm leading-relaxed text-black/70 mt-5">
           {product.description}
         </p>
       )}
 
       {/* Size selector */}
       {product.product_variants && product.product_variants.length > 0 && (
-        <ProductSizeSelector
-          variants={product.product_variants}
-          selectedVariantId={selectedVariant?.id ?? null}
-          onSelect={setSelectedVariant}
-        />
+        <div className="mt-10">
+          <ProductSizeSelector
+            variants={product.product_variants}
+            selectedVariantId={selectedVariant?.id ?? null}
+            onSelect={setSelectedVariant}
+          />
+        </div>
       )}
 
-      <div className="py-4 border-t border-black/10" />
-
       {/* CTA row */}
-      <div className="flex gap-3">
-        <div className="flex-1">
+      <div className="mt-10 pt-8 border-t border-black">
+        <div className="flex gap-3">
           <AddToCartButton
             productId={product.id}
             productName={product.name}
@@ -79,18 +79,20 @@ export default function ProductDetailClient({
             basePrice={product.price}
             imageUrl={imageUrl}
           />
+          <AddToWishlistButton productId={product.id} />
         </div>
-        <AddToWishlistButton productId={product.id} />
+
+        {/* Shipping note */}
+        <p className="text-xs text-black/40 uppercase tracking-widest mt-4">
+          Free shipping on orders over 300€
+        </p>
       </div>
 
-      {/* Shipping note */}
-      <p className="text-xs text-black/40 uppercase tracking-widest">
-        Free shipping on orders over 300€
-      </p>
-
+      {/* Share */}
       <ShareButtons
         url={`https://www.infamous-snowboard.com/products/${product.slug}`}
         title={product.name}
+        className="flex items-center gap-3 mt-10 pt-8 border-t border-black/20"
       />
     </div>
   );

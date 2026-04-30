@@ -58,7 +58,7 @@ export function AddToCartButton({
     <Button
       onClick={handleAddToCart}
       size="lg"
-      className="w-full"
+      className="w-full h-12"
     >
       {added ? "Added!" : "Add to Cart"}
     </Button>
