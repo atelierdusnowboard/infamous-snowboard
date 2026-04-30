@@ -59,7 +59,7 @@ export default function ProductDetailClient({
 
       {/* Size selector */}
       {product.product_variants && product.product_variants.length > 0 && (
-        <div className="mt-12">
+        <div className="mt-10">
           <ProductSizeSelector
             variants={product.product_variants}
             selectedVariantId={selectedVariant?.id ?? null}
@@ -69,7 +69,7 @@ export default function ProductDetailClient({
       )}
 
       {/* CTA row */}
-      <div className="mt-12 pt-10 border-t border-black">
+      <div className="mt-10 pt-8 border-t border-black">
         <div className="flex gap-3">
           <AddToCartButton
             productId={product.id}
@@ -83,7 +83,7 @@ export default function ProductDetailClient({
         </div>
 
         {/* Shipping note */}
-        <p className="text-xs text-black/40 uppercase tracking-widest mt-5">
+        <p className="text-xs text-black/40 uppercase tracking-widest mt-4">
           Free shipping on orders over 300€
         </p>
       </div>
@@ -93,7 +93,7 @@ export default function ProductDetailClient({
         url={`https://www.infamous-snowboard.com/products/${product.slug}`}
         title={product.name}
         imageUrl={imageUrl ?? undefined}
-        className="flex items-center gap-3 mt-12 pt-8 border-t border-black/20"
+        className="flex items-center gap-3 mt-10 pt-8 border-t border-black/20"
       />
     </div>
   );
