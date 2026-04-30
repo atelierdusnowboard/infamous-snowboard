@@ -92,6 +92,7 @@ export default function ProductDetailClient({
       <ShareButtons
         url={`https://www.infamous-snowboard.com/products/${product.slug}`}
         title={product.name}
+        imageUrl={imageUrl ?? undefined}
         className="flex items-center gap-3 mt-10 pt-8 border-t border-black/20"
       />
     </div>
