@@ -43,7 +43,7 @@ async function syncToStripe(
     const stripe = getStripe();
     const params = {
       name,
-      description: description ?? undefined,
+      description: description || undefined,
       images: imageUrl ? [imageUrl] : undefined,
       metadata: { infamous_product_id: productId },
     };
