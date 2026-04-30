@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { formatDate, estimateReadingTime } from "@/lib/utils/format";
+import { formatDate, estimateReadingTime, extractFirstImageFromMarkdown } from "@/lib/utils/format";
 import { Badge } from "@/components/ui/Badge";
 import type { BlogPost } from "@/types/database";
 
@@ -14,7 +14,8 @@ export function BlogCard({ post }: BlogCardProps) {
     ? post.cover_image_path
     : post.cover_image_path
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog/${post.cover_image_path}`
-      : "/lifestyle/INFAMOUS-2.jpg";
+      : extractFirstImageFromMarkdown(post.content)
+        ?? "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/INFAMOUS-2.jpg";
 
   return (
     <Link

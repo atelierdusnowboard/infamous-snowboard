@@ -6,8 +6,9 @@ import { getBlogPostBySlug, getAllBlogSlugs } from "@/lib/queries/blog";
 import { BlogPostContent } from "@/components/blog/BlogPost";
 import { Badge } from "@/components/ui/Badge";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
-import { formatDate, estimateReadingTime } from "@/lib/utils/format";
+import { formatDate, estimateReadingTime, extractFirstImageFromMarkdown } from "@/lib/utils/format";
 import { generateBlogMetadata } from "@/lib/utils/seo";
+import { ShareButtons } from "@/components/blog/ShareButtons";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -52,7 +53,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     ? post.cover_image_path
     : post.cover_image_path
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog/${post.cover_image_path}`
-      : "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365 - Grande.jpeg";
+      : extractFirstImageFromMarkdown(post.content)
+        ?? "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365 - Grande.jpeg";
+
+  const pageUrl = `https://www.infamous-snowboard.com/blog/${post.slug}`;
 
   return (
     <>
@@ -111,6 +115,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Content */}
           <BlogPostContent content={post.content} />
+
+          <ShareButtons url={pageUrl} title={post.title} />
         </div>
       </article>
     </>

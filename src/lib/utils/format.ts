@@ -33,6 +33,11 @@ export function slugify(text: string): string {
     .trim();
 }
 
+export function extractFirstImageFromMarkdown(content: string): string | null {
+  const match = content.match(/!\[.*?\]\((https?:\/\/[^)]+)\)/);
+  return match ? match[1] : null;
+}
+
 export function estimateReadingTime(content: string): number {
   const wordsPerMinute = 200;
   const words = content.trim().split(/\s+/).length;

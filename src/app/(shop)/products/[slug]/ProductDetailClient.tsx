@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/utils/format";
 import { ProductSizeSelector } from "@/components/product/ProductSizeSelector";
 import { AddToCartButton } from "@/components/product/AddToCartButton";
 import { AddToWishlistButton } from "@/components/product/AddToWishlistButton";
+import { ShareButtons } from "@/components/blog/ShareButtons";
 import type { ProductWithVariants } from "@/types/product";
 import type { ProductVariant } from "@/types/database";
 
@@ -86,6 +87,11 @@ export default function ProductDetailClient({
       <p className="text-xs text-black/40 uppercase tracking-widest">
         Free shipping on orders over 300€
       </p>
+
+      <ShareButtons
+        url={`https://www.infamous-snowboard.com/products/${product.slug}`}
+        title={product.name}
+      />
     </div>
   );
 }
