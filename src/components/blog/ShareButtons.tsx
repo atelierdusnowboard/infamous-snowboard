@@ -75,11 +75,11 @@ export function ShareButtons({
         </svg>
       </a>
 
-      {/* Instagram (image share) */}
+      {/* Instagram (image share — mobile only, desktop has no useful fallback) */}
       {imageUrl && (
         <button
           onClick={shareInstagram}
-          className={btnClass}
+          className={`${btnClass} md:hidden`}
           aria-label="Share on Instagram"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" className="fill-black group-hover:fill-white transition-colors">
