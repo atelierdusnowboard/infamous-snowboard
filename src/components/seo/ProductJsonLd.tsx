@@ -19,7 +19,7 @@ export function ProductJsonLd({
   inStock = true,
 }: ProductJsonLdProps) {
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://infamous-snowboard.com";
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.infamous-snowboard.com";
 
   const data = {
     "@context": "https://schema.org/",

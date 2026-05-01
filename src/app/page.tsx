@@ -8,6 +8,7 @@ import Link from "next/link";
 import { getFeaturedProducts } from "@/lib/queries/products";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { ProductWithImages } from "@/types/product";
+import { JsonLd } from "@/components/seo/JsonLd";
 
 const SUPABASE_URL = "https://cawrucyjiyrsctbqewtt.supabase.co";
 
@@ -36,6 +37,24 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Infamous Snowboard",
+          url: "https://www.infamous-snowboard.com",
+          logo: "https://www.infamous-snowboard.com/logo.png",
+          sameAs: ["https://www.instagram.com/infamoussnowboard"],
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Infamous Snowboard",
+          url: "https://www.infamous-snowboard.com",
+        }}
+      />
       <div className="absolute top-0 left-0 right-0 z-40">
         <Header />
       </div>

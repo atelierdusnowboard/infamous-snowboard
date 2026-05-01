@@ -29,7 +29,7 @@ export async function generateMetadata({
   try {
     const post = await getBlogPostBySlug(slug);
     if (!post) return {};
-    return generateBlogMetadata(post);
+    return generateBlogMetadata({ ...post, content: post.content });
   } catch {
     return {};
   }

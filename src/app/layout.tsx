@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   keywords: ["snowboard", "snowboards", "infamous", "park", "freeride", "powder"],
   authors: [{ name: "Infamous Snowboard" }],
   creator: "Infamous Snowboard",
+  alternates: {
+    canonical: "https://www.infamous-snowboard.com",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -29,7 +32,7 @@ export const metadata: Metadata = {
     description: "Handcrafted snowboards for riders who don't need a backstory.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365%20-%20Grande.jpeg",
         width: 1200,
         height: 630,
         alt: "Infamous Snowboard",
@@ -40,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Infamous Snowboard | Less Noise. More Shapes.",
     description: "Handcrafted snowboards for riders who don't need a backstory.",
-    images: ["/og-image.jpg"],
+    images: ["https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365%20-%20Grande.jpeg"],
   },
   robots: {
     index: true,

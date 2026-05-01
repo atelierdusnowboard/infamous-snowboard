@@ -117,3 +117,14 @@ export async function getAllProductSlugs() {
     .eq("is_published", true);
   return (data ?? []).map((p) => p.slug);
 }
+
+export async function getAllProductsForSitemap(): Promise<
+  { slug: string; updated_at: string }[]
+> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("products")
+    .select("slug, updated_at")
+    .eq("is_published", true);
+  return data ?? [];
+}

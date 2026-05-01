@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { extractFirstImageFromMarkdown } from "@/lib/utils/format";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://infamous-snowboard.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.infamous-snowboard.com";
 
 export function generateProductMetadata(product: {
   name: string;
@@ -51,9 +52,15 @@ export function generateBlogMetadata(post: {
   slug: string;
   cover_image_path?: string | null;
   published_at?: string | null;
+  content?: string;
 }): Metadata {
   const description =
     post.excerpt ?? `${post.title} — Infamous Snowboard blog.`;
+
+  const ogImageUrl =
+    post.cover_image_path ??
+    extractFirstImageFromMarkdown(post.content ?? "") ??
+    undefined;
 
   return {
     title: post.title,
@@ -64,10 +71,10 @@ export function generateBlogMetadata(post: {
       url: `${siteUrl}/blog/${post.slug}`,
       type: "article",
       publishedTime: post.published_at ?? undefined,
-      images: post.cover_image_path
+      images: ogImageUrl
         ? [
             {
-              url: post.cover_image_path,
+              url: ogImageUrl,
               width: 1200,
               height: 630,
               alt: post.title,

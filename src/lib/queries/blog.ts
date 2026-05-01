@@ -36,3 +36,14 @@ export async function getAllBlogSlugs(): Promise<string[]> {
     .eq("is_published", true);
   return (data ?? []).map((p) => p.slug);
 }
+
+export async function getAllBlogPostsForSitemap(): Promise<
+  { slug: string; updated_at: string }[]
+> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("blog_posts")
+    .select("slug, updated_at")
+    .eq("is_published", true);
+  return data ?? [];
+}

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://infamous-snowboard.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.infamous-snowboard.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
