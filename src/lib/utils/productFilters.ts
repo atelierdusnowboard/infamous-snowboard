@@ -1,4 +1,5 @@
 import type { Category } from "@/types/database";
+import { compareSize } from "@/lib/utils/format";
 import type { ProductWithImages } from "@/types/product";
 
 export type ProductFamily = "boards" | "bindings" | "clothing" | "generic";
@@ -128,7 +129,7 @@ function buildSizeSection(products: ProductWithImages[]): FilterSection | null {
     key: "size",
     label: "Size",
     options: [...sizeCounts.entries()]
-      .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+      .sort(([a], [b]) => compareSize(a, b))
       .map(([size, count]) => ({
         label: size,
         value: size,

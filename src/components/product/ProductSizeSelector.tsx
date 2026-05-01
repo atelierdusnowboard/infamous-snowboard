@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
+import { compareSize } from "@/lib/utils/format";
 import type { ProductVariant } from "@/types/database";
 
 interface ProductSizeSelectorProps {
@@ -14,9 +15,7 @@ export function ProductSizeSelector({
   selectedVariantId,
   onSelect,
 }: ProductSizeSelectorProps) {
-  const sorted = [...variants].sort((a, b) =>
-    a.size.localeCompare(b.size, undefined, { numeric: true })
-  );
+  const sorted = [...variants].sort((a, b) => compareSize(a.size, b.size));
 
   return (
     <div>

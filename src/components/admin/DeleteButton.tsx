@@ -12,7 +12,7 @@ export function DeleteButton({
   confirmMessage = "Confirmer la suppression ?",
 }: DeleteButtonProps) {
   return (
-    <form action={action}>
+    <form action={action} className="contents">
       <button
         type="submit"
         onClick={(e) => {
