@@ -32,7 +32,13 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
         </div>
 
         {products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black">
+          <div className={`grid gap-px bg-black ${
+            products.length >= 4
+              ? "grid-cols-2 md:grid-cols-4"
+              : products.length === 3
+              ? "grid-cols-2 md:grid-cols-3"
+              : "grid-cols-2"
+          }`}>
             {products.map((product) => (
               <ProductCard key={product.id} product={product} className="border-0" />
             ))}
