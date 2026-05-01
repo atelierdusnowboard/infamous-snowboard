@@ -269,6 +269,7 @@ export async function updateProduct(id: string, formData: FormData, categoryIds:
   }
   revalidatePath(`/products/${parsed.data.slug}`);
   revalidatePath("/shop", "layout");
+  revalidatePath("/");
   return { success: true };
 }
 
@@ -309,6 +310,7 @@ export async function deleteProduct(id: string) {
   if (error) return { error: error.message };
   revalidatePath("/admin/products");
   revalidatePath("/shop", "layout");
+  revalidatePath("/");
   if (product?.slug) revalidatePath(`/products/${product.slug}`);
   return { success: true };
 }
