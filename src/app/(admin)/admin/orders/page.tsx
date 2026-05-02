@@ -17,9 +17,12 @@ export default async function AdminOrdersPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status } = await searchParams;
+  // null = défaut confirmed, "all" = tout, sinon liste séparée par virgules
+  const statuses =
+    status === undefined ? ["confirmed"] : status === "all" ? [] : status.split(",");
   let orders: OrderWithItems[] = [];
   try {
-    orders = await getAllOrders(status);
+    orders = await getAllOrders(statuses.length > 0 ? statuses : undefined);
   } catch {
     // DB not configured
   }

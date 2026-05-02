@@ -42,7 +42,7 @@ export async function getOrderById(orderId: string): Promise<OrderWithItems | nu
   return data as OrderWithItems;
 }
 
-export async function getAllOrders(status?: string): Promise<OrderWithItems[]> {
+export async function getAllOrders(statuses?: string[]): Promise<OrderWithItems[]> {
   const supabase = await createClient();
   let query = supabase
     .from("orders")
@@ -54,8 +54,8 @@ export async function getAllOrders(status?: string): Promise<OrderWithItems[]> {
     )
     .order("created_at", { ascending: false });
 
-  if (status) {
-    query = query.eq("status", status);
+  if (statuses && statuses.length > 0) {
+    query = query.in("status", statuses);
   }
 
   const { data, error } = await query;
