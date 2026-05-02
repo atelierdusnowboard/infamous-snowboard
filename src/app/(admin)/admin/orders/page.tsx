@@ -4,16 +4,22 @@ import { getAllOrders } from "@/lib/queries/orders";
 import { formatPrice, formatDate } from "@/lib/utils/format";
 import { Badge } from "@/components/ui/Badge";
 import type { OrderWithItems } from "@/lib/queries/orders";
+import { StatusFilter } from "./StatusFilter";
 
 export const metadata: Metadata = {
   title: "Admin — Orders",
   robots: { index: false, follow: false },
 };
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
   let orders: OrderWithItems[] = [];
   try {
-    orders = await getAllOrders();
+    orders = await getAllOrders(status);
   } catch {
     // DB not configured
   }
@@ -25,6 +31,8 @@ export default async function AdminOrdersPage() {
           Orders
         </h1>
       </div>
+
+      <StatusFilter />
 
       <div className="border border-black">
         <div className="grid grid-cols-5 px-4 py-3 border-b border-black bg-black text-white text-xs font-bold uppercase tracking-widest">
