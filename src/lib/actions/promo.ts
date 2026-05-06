@@ -21,7 +21,8 @@ export async function validatePromoCode(
       code: code.trim().toUpperCase(),
       active: true,
       limit: 1,
-    });
+      expand: ["data.promotion.coupon"],
+    } as Parameters<typeof stripe.promotionCodes.list>[0]);
 
     const promoCode = promoCodes.data[0];
     if (!promoCode) {

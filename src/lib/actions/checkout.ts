@@ -37,7 +37,9 @@ export async function createCheckoutSession(
   let promoCodeStr: string | null = null;
   if (promoCodeId) {
     try {
-      const promoCode = await stripe.promotionCodes.retrieve(promoCodeId);
+      const promoCode = await stripe.promotionCodes.retrieve(promoCodeId, {
+        expand: ["promotion.coupon"],
+      } as Parameters<typeof stripe.promotionCodes.retrieve>[1]);
       const coupon = promoCode.promotion.coupon;
       if (promoCode.active && coupon && typeof coupon !== "string" && coupon.valid) {
         promoCodeStr = promoCode.code;
