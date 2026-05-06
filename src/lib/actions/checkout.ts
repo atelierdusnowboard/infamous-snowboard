@@ -7,7 +7,8 @@ import type { CartItem } from "@/types/cart";
 
 export async function createCheckoutSession(
   cartItems: CartItem[],
-  shippingData: Record<string, string>
+  shippingData: Record<string, string>,
+  promoCodeId?: string
 ): Promise<{ url: string } | { error: string }> {
   if (cartItems.length === 0) {
     return { error: "Your cart is empty" };
@@ -30,7 +31,28 @@ export async function createCheckoutSession(
     0
   );
   const shippingCost = subtotal >= 300 ? 0 : 12;
-  const total = subtotal + shippingCost;
+
+  // Validate promo code server-side to compute discount amount securely
+  let discountAmount = 0;
+  let promoCodeStr: string | null = null;
+  if (promoCodeId) {
+    try {
+      const promoCode = await stripe.promotionCodes.retrieve(promoCodeId);
+      const coupon = promoCode.promotion.coupon;
+      if (promoCode.active && coupon && typeof coupon !== "string" && coupon.valid) {
+        promoCodeStr = promoCode.code;
+        if (coupon.percent_off) {
+          discountAmount = Math.round((subtotal + shippingCost) * coupon.percent_off) / 100;
+        } else if (coupon.amount_off) {
+          discountAmount = Math.min(coupon.amount_off / 100, subtotal + shippingCost);
+        }
+      }
+    } catch {
+      // Promo code retrieval failed — proceed without discount
+    }
+  }
+
+  const total = subtotal + shippingCost - discountAmount;
 
   // Create the order row with status "pending"
   const { data: order, error: orderError } = await supabase
@@ -46,6 +68,8 @@ export async function createCheckoutSession(
       shipping_country: parsed.data.country,
       subtotal,
       shipping_cost: shippingCost,
+      discount_amount: discountAmount,
+      promo_code: promoCodeStr,
       total,
       notes: parsed.data.notes ?? null,
     })
@@ -144,6 +168,7 @@ export async function createCheckoutSession(
     shipping_address_collection: {
       allowed_countries: ["FR", "BE", "CH", "DE", "IT", "ES", "GB", "US", "CA"],
     },
+    ...(promoCodeId ? { discounts: [{ promotion_code: promoCodeId }] } : {}),
   });
 
   if (!session.url) {

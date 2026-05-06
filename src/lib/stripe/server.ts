@@ -19,4 +19,8 @@ export const stripe = {
   checkout: { sessions: { create: (...args: Parameters<Stripe['checkout']['sessions']['create']>) => getStripe().checkout.sessions.create(...args) } },
   customers: { create: (...args: Parameters<Stripe['customers']['create']>) => getStripe().customers.create(...args) },
   webhooks: { constructEvent: (...args: Parameters<Stripe['webhooks']['constructEvent']>) => getStripe().webhooks.constructEvent(...args) },
+  promotionCodes: {
+    list: (...args: Parameters<Stripe['promotionCodes']['list']>) => getStripe().promotionCodes.list(...args),
+    retrieve: (...args: Parameters<Stripe['promotionCodes']['retrieve']>) => getStripe().promotionCodes.retrieve(...args),
+  },
 }
