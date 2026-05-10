@@ -17,6 +17,7 @@ if (process.env.VERCEL_BRANCH_URL) {
 
 const nextConfig: NextConfig = {
   images: {
+    unoptimized: true,
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
