@@ -89,6 +89,16 @@ export function Footer() {
                   Instagram
                 </a>
               </li>
+              <li>
+                <a
+                  href="https://www.youtube.com/channel/UCzJ2MiPr9uLUL0iBBCVCzmw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:opacity-60 transition-opacity"
+                >
+                  YouTube
+                </a>
+              </li>
             </ul>
           </div>
         </div>

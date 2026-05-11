@@ -45,7 +45,10 @@ export default async function HomePage() {
           name: "Infamous Snowboard",
           url: "https://www.infamous-snowboard.com",
           logo: "https://www.infamous-snowboard.com/logo.png",
-          sameAs: ["https://www.instagram.com/infamous_snowboard/"],
+          sameAs: [
+            "https://www.instagram.com/infamous_snowboard/",
+            "https://www.youtube.com/channel/UCzJ2MiPr9uLUL0iBBCVCzmw",
+          ],
         }}
       />
       <JsonLd

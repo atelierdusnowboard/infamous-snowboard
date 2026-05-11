@@ -138,6 +138,20 @@ export function LifestyleGrid({ images }: { images: string[] }) {
             </button>
           </div>
         )}
+
+        <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-black pt-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-black/40">
+            More laps, clips, and field notes.
+          </p>
+          <a
+            href="https://www.instagram.com/infamous_snowboard/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-black uppercase tracking-widest border border-black px-5 py-3 hover:bg-black hover:!text-white transition-colors text-center"
+          >
+            Follow us on Instagram
+          </a>
+        </div>
       </div>
 
       {activeImage && (

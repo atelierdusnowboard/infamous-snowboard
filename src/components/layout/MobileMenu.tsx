@@ -21,6 +21,7 @@ export function MobileMenu({ categories = [] }: MobileMenuProps) {
   const staticLinks = [
     { href: "/blog", label: "Blog" },
     { href: "https://www.instagram.com/infamous_snowboard/", label: "Instagram", external: true },
+    { href: "https://www.youtube.com/channel/UCzJ2MiPr9uLUL0iBBCVCzmw", label: "YouTube", external: true },
     { href: "/account", label: "Account" },
     { href: "/account/wishlist", label: "Wishlist" },
     { href: "/cart", label: "Cart" },
