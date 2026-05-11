@@ -1,8 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 
 export function HeroSection() {
+  function handleManifestoClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    const manifesto = document.getElementById("manifesto");
+    if (!manifesto) return;
+
+    event.preventDefault();
+    window.history.replaceState(null, "", "#manifesto");
+    manifesto.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <section className="relative w-full min-h-screen bg-black flex flex-col items-start justify-end overflow-hidden">
       {/* Background lifestyle image */}
@@ -34,7 +45,7 @@ export function HeroSection() {
               Shop Boards
             </Button>
           </Link>
-          <Link href="#manifesto">
+          <Link href="#manifesto" onClick={handleManifestoClick}>
             <Button
               variant="ghost"
               size="lg"
