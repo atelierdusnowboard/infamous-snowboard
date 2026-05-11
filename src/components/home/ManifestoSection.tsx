@@ -15,7 +15,7 @@ export function ManifestoSection() {
   ];
 
   return (
-    <section className="bg-black text-white py-20 md:py-28">
+    <section id="manifesto" className="scroll-mt-16 bg-black text-white py-20 md:py-28">
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="max-w-5xl">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-white/30 mb-8">

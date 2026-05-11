@@ -79,6 +79,16 @@ export function Footer() {
                   Account
                 </Link>
               </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/infamous_snowboard/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:opacity-60 transition-opacity"
+                >
+                  Instagram
+                </a>
+              </li>
             </ul>
           </div>
         </div>

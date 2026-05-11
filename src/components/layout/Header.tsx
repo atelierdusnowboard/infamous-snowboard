@@ -71,6 +71,14 @@ export function Header({ categories = [], isAdmin = false }: HeaderProps) {
           >
             Blog
           </Link>
+          <a
+            href="https://www.instagram.com/infamous_snowboard/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
+          >
+            Instagram
+          </a>
         </nav>
 
         {/* Actions */}

@@ -20,6 +20,7 @@ export function MobileMenu({ categories = [] }: MobileMenuProps) {
 
   const staticLinks = [
     { href: "/blog", label: "Blog" },
+    { href: "https://www.instagram.com/infamous_snowboard/", label: "Instagram", external: true },
     { href: "/account", label: "Account" },
     { href: "/account/wishlist", label: "Wishlist" },
     { href: "/cart", label: "Cart" },
@@ -65,10 +66,12 @@ export function MobileMenu({ categories = [] }: MobileMenuProps) {
         )}
 
         {/* Static links */}
-        {staticLinks.map(({ href, label }) => (
+        {staticLinks.map(({ href, label, external }) => (
           <Link
             key={href}
             href={href}
+            target={external ? "_blank" : undefined}
+            rel={external ? "noopener noreferrer" : undefined}
             onClick={() => setMobileMenuOpen(false)}
             className="text-xl font-bold uppercase tracking-wider text-white/60 hover:text-white hover:opacity-80 transition-opacity"
           >

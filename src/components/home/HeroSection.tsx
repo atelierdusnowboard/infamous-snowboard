@@ -34,7 +34,7 @@ export function HeroSection() {
               Shop Boards
             </Button>
           </Link>
-          <Link href="/blog">
+          <Link href="#manifesto">
             <Button
               variant="ghost"
               size="lg"
