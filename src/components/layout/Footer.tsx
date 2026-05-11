@@ -19,7 +19,8 @@ export function Footer() {
               Less Noise. More Shapes.
             </p>
             <p className="text-sm text-black/60 mt-3 max-w-xs">
-              We build boards for riders who don&apos;t need a backstory.
+              Timeless products built with intention. No artificial devaluation,
+              no marketing noise, just the mountain and the ride.
             </p>
           </div>
 
@@ -87,7 +88,7 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Infamous Snowboard. All rights reserved.
           </p>
           <p className="text-xs text-black/40 uppercase tracking-widest">
-            Made for the mountain.
+            Less talk. More ride.
           </p>
         </div>
       </div>

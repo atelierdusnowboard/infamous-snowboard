@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | Infamous Snowboard",
   },
   description:
-    "Infamous Snowboard — handcrafted boards for riders who don't need a backstory. Less noise. More shapes.",
+    "Infamous Snowboard — timeless, honest products built with intention for the mountain, the ride, and the people who use them.",
   keywords: ["snowboard", "snowboards", "infamous", "park", "freeride", "powder"],
   authors: [{ name: "Infamous Snowboard" }],
   creator: "Infamous Snowboard",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://infamous-snowboard.com",
     siteName: "Infamous Snowboard",
     title: "Infamous Snowboard | Less Noise. More Shapes.",
-    description: "Handcrafted snowboards for riders who don't need a backstory.",
+    description: "Timeless, honest snowboard products built with intention. Less noise. More shapes.",
     images: [
       {
         url: "https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365%20-%20Grande.jpeg",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Infamous Snowboard | Less Noise. More Shapes.",
-    description: "Handcrafted snowboards for riders who don't need a backstory.",
+    description: "Timeless, honest snowboard products built with intention. Less noise. More shapes.",
     images: ["https://cawrucyjiyrsctbqewtt.supabase.co/storage/v1/object/public/lifestyle/_DSC3365%20-%20Grande.jpeg"],
   },
   robots: {
