@@ -12,6 +12,7 @@ export interface CartItem {
 export interface CartStore {
   items: CartItem[];
   addItem: (item: CartItem) => void;
+  restoreItems: (items: CartItem[]) => void;
   removeItem: (variantId: string) => void;
   updateQty: (variantId: string, quantity: number) => void;
   clearCart: () => void;

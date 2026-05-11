@@ -24,6 +24,10 @@ export const useCartStore = create<CartStore>()(
         }
       },
 
+      restoreItems: (items: CartItem[]) => {
+        set({ items });
+      },
+
       removeItem: (variantId: string) => {
         set((state) => ({
           items: state.items.filter((i) => i.variantId !== variantId),

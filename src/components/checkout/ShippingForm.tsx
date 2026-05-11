@@ -7,6 +7,7 @@ import { createCheckoutSession } from "@/lib/actions/checkout";
 import { validatePromoCode, type AppliedPromo } from "@/lib/actions/promo";
 import { useCartStore } from "@/lib/store/cart";
 import { useToast } from "@/components/ui/Toast";
+import type { CartItem } from "@/types/cart";
 
 interface ShippingFormProps {
   appliedPromo: AppliedPromo | null;
@@ -25,6 +26,7 @@ export interface CheckoutShippingDraft {
 }
 
 const SHIPPING_DRAFT_KEY = "infamous-checkout-shipping";
+const CHECKOUT_CART_SNAPSHOT_KEY = "infamous-checkout-cart";
 
 const emptyShippingDraft: CheckoutShippingDraft = {
   name: "",
@@ -49,6 +51,7 @@ export function ShippingForm({
   initialShipping,
 }: ShippingFormProps) {
   const items = useCartStore((s) => s.items);
+  const restoreItems = useCartStore((s) => s.restoreItems);
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [isValidatingPromo, startPromoTransition] = useTransition();
@@ -76,6 +79,22 @@ export function ShippingForm({
     }
   }, []);
 
+  useEffect(() => {
+    if (items.length > 0) return;
+
+    try {
+      const stored = window.sessionStorage.getItem(CHECKOUT_CART_SNAPSHOT_KEY);
+      if (!stored) return;
+
+      const parsed = JSON.parse(stored) as CartItem[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        restoreItems(parsed);
+      }
+    } catch {
+      // Ignore corrupted cart snapshots.
+    }
+  }, [items.length, restoreItems]);
+
   function updateShippingDraft(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
@@ -95,6 +114,7 @@ export function ShippingForm({
       data[key] = val as string;
     });
     window.localStorage.setItem(SHIPPING_DRAFT_KEY, JSON.stringify(data));
+    window.sessionStorage.setItem(CHECKOUT_CART_SNAPSHOT_KEY, JSON.stringify(items));
 
     startTransition(async () => {
       const result = await createCheckoutSession(items, data, appliedPromo?.id);
