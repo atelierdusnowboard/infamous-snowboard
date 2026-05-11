@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrderById } from "@/lib/queries/orders";
+import { createServiceClient } from "@/lib/supabase/server";
+import { stripe } from "@/lib/stripe/server";
 import { formatPrice, formatDate } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
+import type { OrderWithItems } from "@/lib/queries/orders";
 
 export const metadata: Metadata = {
   title: "Order Confirmed",
@@ -15,6 +18,47 @@ interface ConfirmationPageProps {
   searchParams: Promise<{ session_id?: string }>;
 }
 
+async function getOrderFromStripeSession(
+  orderId: string,
+  sessionId: string
+): Promise<OrderWithItems | null> {
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+  if (session.metadata?.orderId !== orderId) {
+    return null;
+  }
+
+  const supabase = createServiceClient();
+  const paymentIntentId = typeof session.payment_intent === "string"
+    ? session.payment_intent
+    : (session.payment_intent?.id ?? null);
+
+  if (session.payment_status === "paid") {
+    await supabase
+      .from("orders")
+      .update({
+        status: "confirmed",
+        ...(paymentIntentId ? { payment_intent_id: paymentIntentId } : {}),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", orderId);
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `
+      *,
+      order_items (*)
+    `
+    )
+    .eq("id", orderId)
+    .single();
+
+  if (error) return null;
+  return data as OrderWithItems;
+}
+
 export default async function ConfirmationPage({
   params,
   searchParams,
@@ -24,7 +68,9 @@ export default async function ConfirmationPage({
 
   let order = null;
   try {
-    order = await getOrderById(id);
+    order = session_id
+      ? await getOrderFromStripeSession(id, session_id)
+      : await getOrderById(id);
   } catch {
     notFound();
   }

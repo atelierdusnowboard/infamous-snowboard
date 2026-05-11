@@ -16,7 +16,12 @@ export function getStripe(): Stripe {
 
 // Keep backward compat export for webhook route
 export const stripe = {
-  checkout: { sessions: { create: (...args: Parameters<Stripe['checkout']['sessions']['create']>) => getStripe().checkout.sessions.create(...args) } },
+  checkout: {
+    sessions: {
+      create: (...args: Parameters<Stripe['checkout']['sessions']['create']>) => getStripe().checkout.sessions.create(...args),
+      retrieve: (...args: Parameters<Stripe['checkout']['sessions']['retrieve']>) => getStripe().checkout.sessions.retrieve(...args),
+    },
+  },
   customers: { create: (...args: Parameters<Stripe['customers']['create']>) => getStripe().customers.create(...args) },
   webhooks: { constructEvent: (...args: Parameters<Stripe['webhooks']['constructEvent']>) => getStripe().webhooks.constructEvent(...args) },
   promotionCodes: {
