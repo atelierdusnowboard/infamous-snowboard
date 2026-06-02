@@ -19,6 +19,7 @@ export function MobileMenu({ categories = [] }: MobileMenuProps) {
   }, [mobileMenuOpen]);
 
   const staticLinks = [
+    { href: "/shop", label: "Shop" },
     { href: "/blog", label: "Blog" },
     { href: "https://www.instagram.com/infamous_snowboard/", label: "Instagram", external: true },
     { href: "https://www.youtube.com/channel/UCzJ2MiPr9uLUL0iBBCVCzmw", label: "YouTube", external: true },
