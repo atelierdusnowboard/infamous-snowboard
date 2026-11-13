@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,6 +73,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white text-black">
         <ToastProvider>
           <CartProvider>{children}</CartProvider>
+          <FeedbackWidget />
         </ToastProvider>
       </body>
     </html>
