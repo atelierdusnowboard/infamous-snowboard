@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import type Stripe from "stripe";
+import { processCheckoutPayment } from "@/lib/invoices/automatic";
+import { archivedInvoicePdf, issueOrderInvoice } from "@/lib/invoices/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -24,32 +26,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
+  if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const orderId = session.metadata?.orderId;
-
-    if (!orderId) {
-      return NextResponse.json({ error: "Missing orderId in metadata" }, { status: 400 });
-    }
-
     const supabase = createServiceClient();
-
-    const paymentIntentId = typeof session.payment_intent === "string"
-      ? session.payment_intent
-      : (session.payment_intent?.id ?? null);
-
-    const { error } = await supabase
-      .from("orders")
-      .update({
-        status: "confirmed",
-        ...(paymentIntentId ? { payment_intent_id: paymentIntentId } : {}),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", orderId);
-
-    if (error) {
-      console.error("Failed to update order:", error.message);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    try {
+      await processCheckoutPayment(event.type, session, {
+        async confirmPayment(orderId, paymentIntentId) {
+          const { data: order, error } = await supabase.from("orders")
+            .update({ payment_intent_id: paymentIntentId, updated_at: new Date().toISOString() })
+            .eq("id", orderId)
+            .or(`payment_intent_id.is.null,payment_intent_id.eq.${paymentIntentId}`)
+            .select("id, auto_invoice").single();
+          if (error || !order) throw error ?? new Error("Commande introuvable.");
+          // Les doublons de webhook ne doivent pas rétrograder une commande expédiée.
+          const { error: statusError } = await supabase.from("orders")
+            .update({ status: "confirmed", updated_at: new Date().toISOString() })
+            .eq("id", orderId).eq("status", "pending");
+          if (statusError) throw statusError;
+          return { autoInvoice: order.auto_invoice === true };
+        },
+        async issueAndArchive(orderId) {
+          await archivedInvoicePdf(await issueOrderInvoice(orderId));
+        },
+        async recordError(orderId, message) {
+          const { error } = await supabase.from("orders").update({ invoice_error: message }).eq("id", orderId);
+          if (error) throw error;
+        },
+      });
+    } catch (error) {
+      console.error("[stripe] Traitement du paiement ou de la facture impossible", error);
+      return NextResponse.json({ error: "Payment processing failed" }, { status: 500 });
     }
   }
 

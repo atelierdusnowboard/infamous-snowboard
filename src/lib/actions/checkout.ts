@@ -59,6 +59,7 @@ export async function createCheckoutSession(
     .insert({
       user_id: user?.id ?? null,
       status: "pending",
+      auto_invoice: true,
       shipping_name: parsed.data.name,
       shipping_email: parsed.data.email,
       shipping_address: parsed.data.address,

@@ -65,6 +65,7 @@ export default async function AdminOrderDetailPage({
           <section className="mt-6 border border-black p-4 space-y-4" aria-labelledby="invoice-heading">
             <h2 id="invoice-heading" className="text-xs font-bold uppercase tracking-widest">Facture</h2>
             {invoiceError && <p role="alert" className="text-sm text-red-700">{invoiceError}</p>}
+            {order.invoice_error && <p role="alert" className="text-sm text-red-700">Facturation automatique : {order.invoice_error}</p>}
             {!invoicesAvailable ? (
               <p className="text-sm">La facturation sera disponible après l’installation de la mise à jour de la base de données.</p>
             ) : invoice ? (

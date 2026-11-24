@@ -187,6 +187,8 @@ export interface Database {
       };
       orders: {
         Row: {
+          auto_invoice: boolean;
+          invoice_error: string | null;
           id: string;
           user_id: string | null;
           status: OrderStatus;
@@ -205,6 +207,8 @@ export interface Database {
           updated_at: string;
         };
         Insert: {
+          auto_invoice?: boolean;
+          invoice_error?: string | null;
           id?: string;
           user_id?: string | null;
           status?: OrderStatus;
@@ -223,6 +227,8 @@ export interface Database {
           updated_at?: string;
         };
         Update: {
+          auto_invoice?: boolean;
+          invoice_error?: string | null;
           id?: string;
           user_id?: string | null;
           status?: OrderStatus;

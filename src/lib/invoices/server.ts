@@ -11,7 +11,7 @@ export async function getOrderInvoice(orderId: string): Promise<Invoice | null> 
   return data ? { ...data, snapshot: invoiceSnapshotSchema.parse(data.snapshot), pdf_base64: null } as Invoice : null;
 }
 
-// Appel réservé à une action ayant vérifié l'identité et le rôle administrateur.
+// Appel réservé à une action admin authentifiée ou à un webhook Stripe signé.
 export async function issueOrderInvoice(orderId: string): Promise<Invoice> {
   const db = createServiceClient();
   const { data: existing, error: readError } = await db.from("invoices").select("*").eq("order_id", orderId).maybeSingle();

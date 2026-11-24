@@ -9,6 +9,8 @@ import { verifyInvoicePayment, verifyFrenchSale, verifyPaidLines } from "../src/
 import type Stripe from "stripe";
 import { parseEuroAmount, cartSubtotal, checkoutAmounts } from "../src/lib/utils/money";
 import { formatPrice } from "../src/lib/utils/format";
+import { processCheckoutPayment } from "../src/lib/invoices/automatic";
+import { InvoiceError } from "../src/lib/invoices/model";
 
 const item = { description: "Infamous Édition spéciale - 156", quantity: 2, unitPrice: 199.99, subtotal: 399.98 };
 
@@ -146,4 +148,55 @@ test("les PDF simple et multipage se génèrent avec les accents et les métadon
     assert.ok(many ? parsed.getPageCount() > 2 : parsed.getPageCount() === 1);
     await writeFile(`${dir}/${many ? "multipage" : "simple"}.pdf`, pdf);
   }
+});
+
+const paidSession = { metadata: { orderId: "00000000-0000-4000-8000-000000000001" },
+  payment_status: "paid", payment_intent: "pi_example" } as Stripe.Checkout.Session;
+
+test("l'émission automatique attend le paiement effectif, y compris pour un paiement différé", async () => {
+  const calls: string[] = [];
+  const dependencies = {
+    async confirmPayment() { calls.push("confirm"); return { autoInvoice: true }; },
+    async issueAndArchive() { calls.push("archive"); },
+    async recordError(_id: string, message: string | null) { calls.push(message === null ? "clear" : "error"); },
+  };
+  await processCheckoutPayment("checkout.session.completed", { ...paidSession, payment_status: "unpaid" }, dependencies);
+  assert.deepEqual(calls, []);
+  await processCheckoutPayment("checkout.session.async_payment_succeeded", paidSession, dependencies);
+  assert.deepEqual(calls, ["confirm", "archive", "clear"]);
+});
+
+test("les anciennes commandes sont confirmées sans émission automatique rétroactive", async () => {
+  let confirmed = false;
+  await processCheckoutPayment("checkout.session.completed", paidSession, {
+    async confirmPayment() { confirmed = true; return { autoInvoice: false }; },
+    async issueAndArchive() { assert.fail("Une ancienne commande ne doit pas être facturée automatiquement"); },
+    async recordError() { assert.fail("Aucune erreur de facture attendue"); },
+  });
+  assert.equal(confirmed, true);
+});
+
+test("une panne d'archivage demande un retry, puis le succès efface l'erreur", async () => {
+  let attempts = 0;
+  let message: string | null = null;
+  const dependencies = {
+    async confirmPayment() { return { autoInvoice: true }; },
+    async issueAndArchive() { if (++attempts === 1) throw new Error("Database unavailable"); },
+    async recordError(_id: string, value: string | null) { message = value; },
+  };
+  await assert.rejects(processCheckoutPayment("checkout.session.completed", paidSession, dependencies));
+  assert.ok(message);
+  await processCheckoutPayment("checkout.session.completed", paidSession, dependencies);
+  assert.equal(attempts, 2);
+  assert.equal(message, null);
+});
+
+test("une vente hors périmètre est signalée à l'admin sans boucle de retries", async () => {
+  let message: string | null = null;
+  await processCheckoutPayment("checkout.session.completed", paidSession, {
+    async confirmPayment() { return { autoInvoice: true }; },
+    async issueAndArchive() { throw new InvoiceError("Vente hors France : vérification comptable nécessaire."); },
+    async recordError(_id: string, value: string | null) { message = value; },
+  });
+  assert.equal(message, "Vente hors France : vérification comptable nécessaire.");
 });
