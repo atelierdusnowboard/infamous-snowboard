@@ -8,6 +8,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/invoices", label: "Factures" },
   { href: "/admin/blog", label: "Blog" },
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/feedback", label: "Retours" },

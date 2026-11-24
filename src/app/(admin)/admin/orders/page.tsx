@@ -29,10 +29,11 @@ export default async function AdminOrdersPage({
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-8 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-black uppercase tracking-widest">
           Orders
         </h1>
+        <Link href="/admin/invoices" className="text-xs font-bold uppercase tracking-widest underline">Factures et export comptable</Link>
       </div>
 
       <StatusFilter />

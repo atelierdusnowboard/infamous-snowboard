@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils/format";
 import type { AppliedPromo } from "@/lib/actions/promo";
+import { checkoutAmounts } from "@/lib/utils/money";
 
 interface OrderSummaryProps {
   appliedPromo: AppliedPromo | null;
@@ -11,16 +12,7 @@ interface OrderSummaryProps {
 
 export function OrderSummary({ appliedPromo }: OrderSummaryProps) {
   const items = useCartStore((s) => s.items);
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal >= 300 ? 0 : 12;
-
-  const discountAmount = appliedPromo
-    ? appliedPromo.percentOff
-      ? Math.round((subtotal + shipping) * appliedPromo.percentOff) / 100
-      : Math.min(appliedPromo.amountOff ?? 0, subtotal + shipping)
-    : 0;
-
-  const total = subtotal + shipping - discountAmount;
+  const { subtotal, shippingCost: shipping, discountAmount, total } = checkoutAmounts(items, appliedPromo);
 
   return (
     <div className="border border-black">

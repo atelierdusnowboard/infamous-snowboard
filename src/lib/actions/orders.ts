@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { orderSchema } from "@/lib/validations/order";
 import type { CartItem } from "@/types/cart";
+import { checkoutAmounts } from "@/lib/utils/money";
 
 export async function createOrder(
   cartItems: CartItem[],
@@ -19,12 +20,7 @@ export async function createOrder(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const shippingCost = subtotal >= 300 ? 0 : 12;
-  const total = subtotal + shippingCost;
+  const { subtotal, shippingCost, total } = checkoutAmounts(cartItems);
 
   const { data: order, error: orderError } = await supabase
     .from("orders")
@@ -56,7 +52,7 @@ export async function createOrder(
     size: item.size ?? null,
     unit_price: item.price,
     quantity: item.quantity,
-    subtotal: item.price * item.quantity,
+    subtotal: Math.round(item.price * 100) * item.quantity / 100,
     image_path: item.image ?? null,
   }));
 

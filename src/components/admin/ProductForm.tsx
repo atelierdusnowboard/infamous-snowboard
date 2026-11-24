@@ -15,6 +15,7 @@ import {
 import type { ProductImage } from "@/types/database";
 import { useToast } from "@/components/ui/Toast";
 import { slugify } from "@/lib/utils/format";
+import { parseEuroAmount } from "@/lib/utils/money";
 import type { ProductWithVariants } from "@/types/product";
 import type { Category } from "@/types/database";
 
@@ -140,23 +141,19 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
     formData.set("specs", JSON.stringify(specs));
     formData.set("is_published", String(saveAsDraft ? false : isPublished));
     formData.set("is_featured", String(isFeatured));
+    const variants = variantRows.filter(row => row.size.trim()).map(row => ({
+      id: row.id,
+      size: row.size.trim(),
+      stock_qty: Number(row.stockQty),
+      price_delta: parseEuroAmount(row.priceDelta.trim() || "0"),
+    }));
+    if (variants.some(row => !Number.isInteger(row.stock_qty) || row.stock_qty < 0 || !Number.isFinite(row.price_delta))) {
+      toast("Vérifiez les stocks et les prix des variantes (exemple : 19,90).", "error");
+      return;
+    }
     formData.set(
       "variants",
-      JSON.stringify(
-        variantRows
-          .map((row) => ({
-            id: row.id,
-            size: row.size.trim(),
-            stock_qty: Number(row.stockQty),
-            price_delta: Number(row.priceDelta),
-          }))
-          .filter(
-            (row) =>
-              row.size.length > 0 &&
-              Number.isFinite(row.stock_qty) &&
-              Number.isFinite(row.price_delta)
-          )
-      )
+      JSON.stringify(variants)
     );
 
     startTransition(async () => {
@@ -260,8 +257,8 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
         <Input
           name="price"
           label="Price (EUR)"
-          type="number"
-          step="0.01"
+          type="text"
+          inputMode="decimal"
           required
           defaultValue={product?.price ?? ""}
         />
@@ -365,8 +362,8 @@ export function ProductForm({ product, categories, initialCategoryIds }: Product
                 />
                 <Input
                   label="Price Delta (EUR)"
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={row.priceDelta}
                   onChange={(e) => updateVariantRow(idx, "priceDelta", e.target.value)}
                 />

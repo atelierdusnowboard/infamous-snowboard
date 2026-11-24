@@ -34,3 +34,19 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Factures des ventes Infamous
+
+Les administrateurs peuvent émettre une facture acquittée depuis le détail d’une commande payée, puis télécharger le PDF. `/admin/invoices` rassemble les factures et propose un export CSV annuel (année d’émission, fuseau Europe/Paris).
+
+Installation : appliquer `supabase/migrations/0011_invoices.sql` sur la base Supabase avant de déployer cette version. La migration n’émet aucune facture et ne modifie pas les commandes existantes. Aucun abonnement Stripe Invoicing n’est utilisé ; seule l’API de paiement existante sert à contrôler les encaissements.
+
+Configuration validée : ATELIER DU SNOWBOARD, SARL au capital de 1 000 EUR, 11 rue des Sagnes, 38860 Les Deux Alpes, SIRET 52856609400017, RCS Grenoble 528566094, TVA FR09528566094. Les prix sont TTC et le taux utilisé est 20 %.
+
+L’émission est manuelle et réservée aux ventes facturées et livrées en France. Le paiement doit être encaissé en EUR, sans remboursement ni contestation ; le total, les articles et la remise doivent correspondre à Stripe. Les coordonnées de facturation sont celles du paiement. Les ventes internationales, les paiements sans référence exploitable et les corrections par avoir demandent un traitement comptable distinct. Ce module PDF ne réalise pas l’e-reporting ni la transmission B2B par une plateforme agréée.
+
+La série `INF-000001`, `INF-000002`, etc. est distincte pour les ventes du site et ne redémarre pas chaque année. L’attribution est transactionnelle et protégée contre les doubles clics concurrents. Une ancienne vente reçoit la date réelle d’émission et conserve sa date de paiement. L’admin doit vérifier qu’elle n’a pas déjà été facturée ailleurs.
+
+Les coordonnées, articles, montants et mentions du vendeur sont figés dans `invoices.snapshot`. Le PDF final est conservé dans `invoices.pdf_base64` : les téléchargements suivants rendent les mêmes octets. Une facture émise ne peut être modifiée ni supprimée via l’application ou les opérations SQL ordinaires. Inclure ces tables dans les sauvegardes durables de la base ; ne pas modifier ou réinitialiser le compteur en production.
+
+Validation : `npm run test:invoices` vérifie les saisies avec virgule, les totaux du panier, les arrondis, les paiements refusés, l’export CSV et le rendu PDF simple/multipage. Les exemples fictifs sont créés dans `/tmp/infamous-invoice-preview`. La migration a aussi été testée sur un PostgreSQL local isolé : numérotation concurrente, idempotence, rollback, archivage immuable et droits d’accès.

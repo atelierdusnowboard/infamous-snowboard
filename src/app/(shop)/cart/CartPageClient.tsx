@@ -5,10 +5,11 @@ import { useCartStore } from "@/lib/store/cart";
 import { CartItem } from "@/components/cart/CartItem";
 import { CartSummary } from "@/components/cart/CartSummary";
 import { Button } from "@/components/ui/Button";
+import { cartSubtotal } from "@/lib/utils/money";
 
 export default function CartPageClient() {
   const items = useCartStore((s) => s.items);
-  const total = useCartStore((s) => s.total);
+  const total = cartSubtotal(items);
 
   if (items.length === 0) {
     return (

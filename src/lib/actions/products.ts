@@ -6,6 +6,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { productSchema } from "@/lib/validations/product";
 import { getStripe } from "@/lib/stripe/server";
 import { getProductImageUrl } from "@/lib/utils/image";
+import { parseEuroAmount } from "@/lib/utils/money";
 
 const productVariantSchema = z.object({
   id: z.string().uuid().optional(),
@@ -181,7 +182,7 @@ export async function createProduct(formData: FormData, categoryIds: string[] = 
     slug: formData.get("slug") as string,
     tagline: formData.get("tagline") as string,
     description: formData.get("description") as string,
-    price: Number(formData.get("price")),
+    price: parseEuroAmount(formData.get("price")),
     category_id: primaryCategoryId || null,
     specs: JSON.parse((formData.get("specs") as string) ?? "{}"),
     is_published: formData.get("is_published") === "true",
@@ -227,7 +228,7 @@ export async function updateProduct(id: string, formData: FormData, categoryIds:
     slug: formData.get("slug") as string,
     tagline: formData.get("tagline") as string,
     description: formData.get("description") as string,
-    price: Number(formData.get("price")),
+    price: parseEuroAmount(formData.get("price")),
     category_id: primaryCategoryId || null,
     specs: JSON.parse((formData.get("specs") as string) ?? "{}"),
     is_published: formData.get("is_published") === "true",

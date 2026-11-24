@@ -6,10 +6,11 @@ import { useUIStore } from "@/lib/store/ui";
 import { CartItem } from "./CartItem";
 import { formatPrice } from "@/lib/utils/format";
 import { Button } from "@/components/ui/Button";
+import { cartSubtotal } from "@/lib/utils/money";
 
 export function CartDrawer() {
   const items = useCartStore((s) => s.items);
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cartSubtotal(items);
   const { cartOpen, setCartOpen } = useUIStore();
   const shipping = total >= 300 ? 0 : 12;
 

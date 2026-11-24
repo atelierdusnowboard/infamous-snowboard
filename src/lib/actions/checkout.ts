@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe/server";
 import { orderSchema } from "@/lib/validations/order";
 import type { CartItem } from "@/types/cart";
+import { checkoutAmounts } from "@/lib/utils/money";
 
 export async function createCheckoutSession(
   cartItems: CartItem[],
@@ -26,11 +27,7 @@ export async function createCheckoutSession(
   // Use service client for DB writes to bypass RLS issues in Server Actions
   const supabase = createServiceClient();
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const shippingCost = subtotal >= 300 ? 0 : 12;
+  const { subtotal, shippingCost } = checkoutAmounts(cartItems);
 
   // Validate promo code server-side to compute discount amount securely
   let discountAmount = 0;
@@ -44,7 +41,7 @@ export async function createCheckoutSession(
       if (promoCode.active && coupon && typeof coupon !== "string" && coupon.valid) {
         promoCodeStr = promoCode.code;
         if (coupon.percent_off) {
-          discountAmount = Math.round((subtotal + shippingCost) * coupon.percent_off) / 100;
+          discountAmount = checkoutAmounts(cartItems, { percentOff: coupon.percent_off, amountOff: null }).discountAmount;
         } else if (coupon.amount_off) {
           discountAmount = Math.min(coupon.amount_off / 100, subtotal + shippingCost);
         }
@@ -54,7 +51,7 @@ export async function createCheckoutSession(
     }
   }
 
-  const total = subtotal + shippingCost - discountAmount;
+  const total = (Math.round(subtotal * 100) + Math.round(shippingCost * 100) - Math.round(discountAmount * 100)) / 100;
 
   // Create the order row with status "pending"
   const { data: order, error: orderError } = await supabase
@@ -92,7 +89,7 @@ export async function createCheckoutSession(
     size: item.size ?? null,
     unit_price: item.price,
     quantity: item.quantity,
-    subtotal: item.price * item.quantity,
+    subtotal: Math.round(item.price * 100) * item.quantity / 100,
     image_path: item.image ?? null,
   }));
 
@@ -176,6 +173,17 @@ export async function createCheckoutSession(
   if (!session.url) {
     return { error: "Failed to create Stripe session" };
   }
+
+  // Stripe reste la référence du montant à encaisser, y compris ses arrondis
+  // de remise. Sauvegarder ce montant avant de communiquer l'URL de paiement.
+  if (session.amount_total === null || session.amount_subtotal !== Math.round((subtotal + shippingCost) * 100)) {
+    return { error: "Le montant du paiement n’a pas pu être vérifié." };
+  }
+  const { error: totalsError } = await supabase.from("orders").update({
+    total: session.amount_total / 100,
+    discount_amount: (session.total_details?.amount_discount ?? 0) / 100,
+  }).eq("id", order.id);
+  if (totalsError) return { error: "Le montant de la commande n’a pas pu être enregistré. Veuillez réessayer." };
 
   return { url: session.url };
 }
